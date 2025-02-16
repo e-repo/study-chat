@@ -1,0 +1,121 @@
+openapi: 3.0.3
+info:
+  title: Модуль авторизации для чата
+  version: 0.0.1
+paths:
+  /users:
+    post:
+      summary: Создание пользователя (регистрация)
+      description: Создание нового пользователя по имени и email
+      tags:
+        - Регистрация
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: Пользователь успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateUserResponse'
+        '400':
+          description: Не валидные данные запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Пользователь уже существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутреняя ошибка сервера, обратитесь к администратору
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+#  /users/{id}:
+#    get:
+#      summary: Get a users by ID
+#      description: Retrieves users details using the users ID provided in the path
+#      tags:
+#        - users
+#      parameters:
+#        - in: path
+#          name: id
+#          required: true
+#          schema:
+#            type: string
+#            format: uuid
+#          description: User ID
+#      responses:
+#        '200':
+#          description: User details successfully retrieved
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/GetUserResponse'
+#        '400':
+#          description: Invalid users ID
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/ErrorResponse'
+#        '404':
+#          description: User not found
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/ErrorResponse'
+#        '500':
+#          description: Failed to get users
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    CreateUserRequest:
+      type: object
+      required:
+        - firstName
+        - email
+        - password
+      properties:
+        firstName:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    CreateUserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+#    GetUserResponse:
+#      type: object
+#      properties:
+#        id:
+#          type: string
+#          format: uuid
+#        name:
+#          type: string
+#        email:
+#          type: string
+#          format: email
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
