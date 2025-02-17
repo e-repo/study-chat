@@ -1,4 +1,4 @@
-include .env
+include ./backend/.env
 export
 
 .PHONY: help unit_test integration_test test lint coverage_report cpu_profile mem_profile migrate_up migrate_down create_migration
@@ -16,15 +16,15 @@ install:
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
 unit_test:
-	go test -v ./internal/...
+	go test -v ./backend/internal/...
 
 integration_test:
-	go test -v ./integration_test/...
+	go test -v ./backend/integration_test/...
 
 test: unit_test integration_test
 
 lint:
-	go fmt ./...
+	go fmt ./backend/...
 	find . -name '*.go' ! -path "./generated/*" -exec goimports -local study-chat/ -w {} +
 	find . -name '*.go' ! -path "./generated/*" -exec golines -w {} -m 120 \;
 	golangci-lint run ./...
@@ -47,10 +47,10 @@ mem_profile:
 DB_URL=postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOSTS):$(POSTGRES_PORT)/$(POSTGRES_DATABASE)?sslmode=$(if $(filter $(POSTGRES_SSL),true),require,disable)
 
 migrate_up:
-	migrate -path migrations -database "$(DB_URL)" up
+	migrate -path ./backend/migrations -database "$(DB_URL)" up
 
 migrate_down:
-	migrate -path migrations -database "$(DB_URL)" down $(count)
+	migrate -path ./backend/migrations -database "$(DB_URL)" down $(count)
 
 create_migration:
-	migrate create -ext sql -dir migrations $(name)
+	migrate create -ext sql -dir ./backend/migrations $(name)
