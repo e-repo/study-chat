@@ -4,26 +4,26 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
+	"golang.org/x/sync/errgroup"
+	hasql "golang.yandex/hasql/sqlx"
 	"log/slog"
 	"net/http"
 	_ "net/http/pprof" //nolint:gosec // pprof port is not exposed to the internet
 	"os"
 	"os/signal"
 	"strings"
+	"study-chat/internal/infra/service"
 	"study-chat/internal/ui/api"
 
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
-	"golang.org/x/sync/errgroup"
-	hasql "golang.yandex/hasql/sqlx"
-
-	"study-chat/internal/infrastructure/user_infra"
+	userinfra "study-chat/internal/infra/user_infra"
 	"study-chat/pkg/logger"
 	"study-chat/pkg/postgres"
 	"study-chat/pkg/sentry"
 )
 
-func Run(cfg Config) error {
+func Run(cfg service.Config) error {
 	if err := sentry.Init(cfg.Sentry.DSN, cfg.Sentry.Environment); err != nil {
 		return fmt.Errorf("failed to init sentry: %w", err)
 	}
@@ -60,10 +60,10 @@ func Run(cfg Config) error {
 	return nil
 }
 
-func startServers(ctx context.Context, g *errgroup.Group, cluster *hasql.Cluster, cfg Config) {
-	userRepo := user_infra.NewPostgres(cluster)
+func startServers(ctx context.Context, g *errgroup.Group, cluster *hasql.Cluster, cfg service.Config) {
+	locator := initLocator(cluster, cfg)
 
-	httpServer := api.SetupHTTPServer(userRepo)
+	httpServer := api.SetupHTTPServer(locator)
 	//grpcServer := application.SetupGRPCServer(userRepo, orderRepo, productRepo)
 
 	address := "0.0.0.0:" + cfg.Server.Port
@@ -100,7 +100,7 @@ func startServers(ctx context.Context, g *errgroup.Group, cluster *hasql.Cluster
 	})
 }
 
-func startPprofServer(ctx context.Context, g *errgroup.Group, cfg Config) {
+func startPprofServer(ctx context.Context, g *errgroup.Group, cfg service.Config) {
 	pprofAddress := "0.0.0.0:" + cfg.Server.PprofPort
 	//nolint:gosec // pprofServer is not exposed to the internet
 	pprofServer := &http.Server{Addr: pprofAddress, Handler: http.DefaultServeMux}
@@ -122,4 +122,16 @@ func startPprofServer(ctx context.Context, g *errgroup.Group, cfg Config) {
 		}
 		return nil
 	})
+}
+
+func initLocator(cluster *hasql.Cluster, cfg service.Config) service.LocatorInterface {
+	locator := service.NewLocator()
+	userRepo := userinfra.NewPostgres(cluster)
+	validatorComp := service.NewRuValidator()
+
+	locator.Add(service.ValidatorServiceKey, validatorComp)
+	locator.Add(service.ConfigServiceKey, cfg)
+	locator.Add(service.UserRepositoryServiceKey, userRepo)
+
+	return locator
 }

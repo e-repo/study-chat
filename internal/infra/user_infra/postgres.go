@@ -57,7 +57,7 @@ func (r *PostgresRepo) UpdateUser(
 	updateFn func(*domain.User) (bool, error),
 ) (*domain.User, error) {
 	db := r.cluster.Primary().DBx()
-	user, err := r.GetUser(ctx, id)
+	user, err := r.GetUserById(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка получения пользователя: %w", err)
 	}
@@ -106,10 +106,10 @@ func (r *PostgresRepo) SaveUser(ctx context.Context, entity domain.User) error {
 	return nil
 }
 
-func (r *PostgresRepo) GetUser(ctx context.Context, id uuid.UUID) (*domain.User, error) {
+func (r *PostgresRepo) GetUserById(ctx context.Context, id uuid.UUID) (*domain.User, error) {
 	db := r.cluster.StandbyPreferred().DBx()
 	var user userDB
-	query := `SELECT id, first_name, email FROM user WHERE id = $1`
+	query := `SELECT id, first_name, email FROM "user" WHERE id = $1`
 	if err := db.GetContext(ctx, &user, query, id); err != nil {
 		return nil, fmt.Errorf("ошибка получения пользователя: %w", err)
 	}
@@ -118,6 +118,27 @@ func (r *PostgresRepo) GetUser(ctx context.Context, id uuid.UUID) (*domain.User,
 			Id:       user.ID,
 			FistName: user.FirstName,
 			Email:    user.Email,
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("ошибка инициализации пользователя: %w", err)
+	}
+	return entity, nil
+}
+
+func (r *PostgresRepo) GetUserByEmail(ctx context.Context, email string) (*domain.User, error) {
+	db := r.cluster.StandbyPreferred().DBx()
+	var user userDB
+	query := `SELECT id, first_name, email, password FROM "user" WHERE email = $1`
+	if err := db.GetContext(ctx, &user, query, email); err != nil {
+		return nil, fmt.Errorf("ошибка получения пользователя: %w", err)
+	}
+	entity, err := domain.NewUser(
+		&domain.UserDto{
+			Id:       user.ID,
+			FistName: user.FirstName,
+			Email:    user.Email,
+			PassHash: user.Password,
 		},
 	)
 	if err != nil {

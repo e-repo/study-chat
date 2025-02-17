@@ -7,6 +7,17 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+// AuthUserRequest defines model for AuthUserRequest.
+type AuthUserRequest struct {
+	Email    openapi_types.Email `json:"email"`
+	Password string              `json:"password"`
+}
+
+// AuthUserResponse defines model for AuthUserResponse.
+type AuthUserResponse struct {
+	Token string `json:"token"`
+}
+
 // CreateUserRequest defines model for CreateUserRequest.
 type CreateUserRequest struct {
 	Email     openapi_types.Email `json:"email"`
@@ -24,5 +35,8 @@ type ErrorResponse struct {
 	Message *string `json:"message,omitempty"`
 }
 
-// PostUsersJSONRequestBody defines body for CreateUser for application/json ContentType.
+// PostAuthJSONRequestBody defines body for PostAuth for application/json ContentType.
+type PostAuthJSONRequestBody = AuthUserRequest
+
+// PostUsersJSONRequestBody defines body for PostUsers for application/json ContentType.
 type PostUsersJSONRequestBody = CreateUserRequest

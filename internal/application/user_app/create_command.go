@@ -10,12 +10,12 @@ func NewCreateUserCommand(
 	firstName string,
 	email string,
 	password string,
-) (*CreateUserCommand, error) {
+) *CreateUserCommand {
 	return &CreateUserCommand{
 		fistName: firstName,
 		email:    email,
 		password: password,
-	}, nil
+	}
 }
 
 func (c *CreateUserCommand) FirstName() string { return c.fistName }

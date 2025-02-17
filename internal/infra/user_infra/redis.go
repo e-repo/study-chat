@@ -81,7 +81,7 @@ func (r *RedisRepo) SaveUser(ctx context.Context, user user_dmn.User) error {
 	return nil
 }
 
-//func (r *RedisRepo) GetUser(ctx context.Context, id uuid.UUID) (*users.UserRepository, error) {
+//func (r *RedisRepo) GetUserById(ctx context.Context, id uuid.UUID) (*users.UserRepository, error) {
 //	val, err := r.client.Get(ctx, id.String()).Result()
 //	if err != nil {
 //		if errors.Is(err, redis.Nil) {

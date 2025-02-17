@@ -82,7 +82,7 @@ func (r *InMemoryRepo) SaveUser(_ context.Context, u domain.User) error {
 	return nil
 }
 
-//func (r *InMemoryRepo) GetUser(_ context.Context, id uuid.UUID) (*domain.User, error) {
+//func (r *InMemoryRepo) GetUserById(_ context.Context, id uuid.UUID) (*domain.User, error) {
 //	u, ok := r.users[id]
 //	if !ok {
 //		return nil, domain.ErrUserNotFound

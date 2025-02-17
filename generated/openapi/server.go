@@ -9,6 +9,9 @@ import (
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// Аутентификация пользователя (регистрация)
+	// (POST /auth)
+	PostAuth(ctx echo.Context) error
 	// Создание пользователя (регистрация)
 	// (POST /users)
 	PostUsers(ctx echo.Context) error
@@ -17,6 +20,15 @@ type ServerInterface interface {
 // ServerInterfaceWrapper converts echo contexts to parameters.
 type ServerInterfaceWrapper struct {
 	Handler ServerInterface
+}
+
+// PostAuth converts echo context to params.
+func (w *ServerInterfaceWrapper) PostAuth(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostAuth(ctx)
+	return err
 }
 
 // PostUsers converts echo context to params.
@@ -56,6 +68,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
+	router.POST(baseURL+"/auth", wrapper.PostAuth)
 	router.POST(baseURL+"/users", wrapper.PostUsers)
 
 }

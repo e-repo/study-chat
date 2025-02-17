@@ -3,6 +3,7 @@ package application_test
 import (
 	"context"
 	"fmt"
+	"study-chat/internal/infra/service"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -10,8 +11,7 @@ import (
 	"study-chat/generated/openapi"
 	"study-chat/generated/protobuf"
 	"study-chat/integration_tests/suites"
-	"study-chat/internal"
-	infra "study-chat/internal/infrastructure/user_infra"
+	infra "study-chat/internal/infra/user_infra"
 	"study-chat/pkg/postgres"
 )
 
@@ -48,7 +48,7 @@ func TestUsersSuite(t *testing.T) {
 }
 
 func initPostgresRepo() (*infra.PostgresRepo, error) {
-	cfg, err := internal.LoadConfig()
+	cfg, err := service.LoadConfig()
 	if err != nil {
 		return nil, fmt.Errorf("failed to load config: %w", err)
 	}

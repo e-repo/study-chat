@@ -3,6 +3,7 @@ package suites
 import (
 	"log/slog"
 	"os"
+	"study-chat/internal/infra/service"
 	"sync"
 	"time"
 
@@ -26,7 +27,7 @@ type RunServerSuite struct {
 }
 
 func (suite *RunServerSuite) SetupSuite(port string) {
-	cfg, err := internal.LoadConfig()
+	cfg, err := service.LoadConfig()
 	if err != nil {
 		suite.Fail("Failed to load config", err)
 	}

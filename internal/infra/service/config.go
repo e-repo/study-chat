@@ -1,4 +1,4 @@
-package internal
+package service
 
 import (
 	"fmt"
@@ -7,6 +7,12 @@ import (
 	"time"
 
 	"study-chat/pkg/environment"
+)
+
+const (
+	ConfigServiceKey         = "config"
+	ValidatorServiceKey      = "validator"
+	UserRepositoryServiceKey = "user_repository"
 )
 
 const (
@@ -44,6 +50,7 @@ func LoadConfig() (Config, error) {
 type Server struct {
 	Environment       environment.Type
 	Port              string
+	HmacSecretKey     string
 	InterruptTimeout  time.Duration
 	ReadHeaderTimeout time.Duration
 	PprofPort         string
@@ -54,6 +61,7 @@ func loadServer() (Server, error) {
 
 	server.Environment = environment.Type(getEnv("ENV_TYPE", string(environment.Testing)))
 	server.Port = getEnv("SERVER_PORT", "8080")
+	server.HmacSecretKey = getEnv("SERVER_HMAC_SECRET", "secret")
 	interruptTimeout, err := time.ParseDuration(getEnv("INTERRUPT_TIMEOUT", "2s"))
 	if err != nil {
 		return server, fmt.Errorf("could not parse interrupt timeout: %w", err)

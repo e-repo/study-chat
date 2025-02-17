@@ -37,13 +37,13 @@ func CreateUser(
 	return &userDto, nil
 }
 
-//func (h UserServer) CreateUser(
+//func (h UserEndpoints) CreateUser(
 //	ctx context.Context,
 //	req *protobuf.CreateUserRequest,
 //) (*protobuf.CreateUserResponse, error) {
-//	email := req.GetEmail()
-//	user, err := h.repo.CreateUser(ctx, email, func() (*userdmn.User, error) {
-//		return userdmn.CreateUser(req.GetName(), email)
+//	Email := req.GetEmail()
+//	user, err := h.repo.CreateUser(ctx, Email, func() (*userdmn.User, error) {
+//		return userdmn.CreateUser(req.GetName(), Email)
 //	})
 //	if err != nil {
 //		if errors.Is(err, userdmn.ErrInvalidUser) || errors.Is(err, userdmn.ErrUserValidation) {

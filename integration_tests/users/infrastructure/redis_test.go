@@ -2,11 +2,11 @@ package infrastructure_test
 
 import (
 	"context"
+	"study-chat/internal/infra/service"
 	"testing"
 
-	"study-chat/internal"
 	"study-chat/internal/domain/user_dmn"
-	usersInfra "study-chat/internal/infrastructure/user_infra"
+	usersInfra "study-chat/internal/infra/user_infra"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
@@ -20,7 +20,7 @@ type RedisRepoSuite struct {
 }
 
 func (suite *RedisRepoSuite) SetupSuite() {
-	config, err := internal.LoadConfig()
+	config, err := service.LoadConfig()
 	suite.Require().NoError(err)
 
 	repo := usersInfra.NewRedis(

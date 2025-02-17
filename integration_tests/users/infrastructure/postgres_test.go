@@ -2,12 +2,12 @@ package infrastructure_test
 
 import (
 	"context"
+	"study-chat/internal/infra/service"
 	"testing"
 
-	"study-chat/internal"
 	"study-chat/pkg/postgres"
 
-	infra "study-chat/internal/infrastructure/user_infra"
+	infra "study-chat/internal/infra/user_infra"
 
 	"github.com/stretchr/testify/suite"
 )
@@ -18,7 +18,7 @@ type PostgresRepoSuite struct {
 }
 
 func (suite *PostgresRepoSuite) SetupSuite() {
-	cfg, err := internal.LoadConfig()
+	cfg, err := service.LoadConfig()
 	if err != nil {
 		suite.Fail("Failed to load config", err)
 	}
@@ -47,7 +47,7 @@ func (suite *PostgresRepoSuite) SetupSuite() {
 //	})
 //	suite.Require().NoError(err)
 //
-//	gotten, err := suite.repo.GetUser(context.Background(), created.ID())
+//	gotten, err := suite.repo.GetUserById(context.Background(), created.ID())
 //	suite.Require().NoError(err)
 //	suite.Require().Equal(created, gotten)
 //
@@ -57,7 +57,7 @@ func (suite *PostgresRepoSuite) SetupSuite() {
 //	})
 //	suite.Require().NoError(err)
 //
-//	gotten, err = suite.repo.GetUser(context.Background(), created.ID())
+//	gotten, err = suite.repo.GetUserById(context.Background(), created.ID())
 //	suite.Require().NoError(err)
 //	suite.Require().Equal(updated, gotten)
 //

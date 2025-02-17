@@ -1,24 +1,22 @@
 package api
 
 import (
+	"github.com/labstack/echo/v4"
 	"net/http"
-	userapp "study-chat/internal/ui/api/user_ui"
+	userui "study-chat/internal/ui/api/user_ui"
 
 	"study-chat/generated/openapi"
-	userdmn "study-chat/internal/domain/user_dmn"
 	"study-chat/pkg/echomiddleware"
 
-	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
 type httpServer struct {
-	userapp.UserServer
+	userui.UserEndpoints
 }
 
-func SetupHTTPServer(userRepo userdmn.UserRepository) *echo.Echo {
+func SetupHTTPServer(locator userui.UserLocator) *echo.Echo {
 	e := echo.New()
-
 	e.Pre(middleware.RemoveTrailingSlash())
 	//e.Use(echomiddleware.SlogLoggerMiddleware(slog.Default()))
 	e.Use(echomiddleware.PutRequestIDContext)
@@ -31,7 +29,7 @@ func SetupHTTPServer(userRepo userdmn.UserRepository) *echo.Echo {
 	})
 
 	server := httpServer{}
-	server.UserServer = userapp.SetupServer(userRepo)
+	server.UserEndpoints = userui.SetupEndpoints(locator)
 
 	openapi.RegisterHandlers(e, server)
 
