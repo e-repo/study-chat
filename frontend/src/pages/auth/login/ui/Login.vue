@@ -11,7 +11,7 @@
 				>
 					<v-card-item>
 						<v-card-title>
-							<h4 class="text-center">Админка</h4>
+							<h4 class="text-center">Вход</h4>
 						</v-card-title>
 						<v-alert
 							v-if="loginForm.serverError"
@@ -55,7 +55,7 @@
 								<v-btn
 									:disabled="!loginForm.isValid"
 									:loading="loginForm.loading"
-									class="w-25"
+									class="w-100"
 									type="submit"
 									color="success"
 								>
@@ -70,19 +70,10 @@
 					<v-divider class="mx-4"></v-divider>
 
 					<v-card-actions
-						class="ma-2 flex-column align-start"
+						class="ma-2 flex-column align-end"
 					>
-						<v-btn
-							class="w-100"
-							type="button"
-							color="primary"
-							variant="outlined"
-							disabled
-						>
-							Вход через VK
-						</v-btn>
 						<p class="mt-2">
-							<router-link to="/request-reset-password" class="text-info">Забыл пароль?</router-link>
+							<router-link to="/register" class="text-info">Зарегистрироваться</router-link>
 						</p>
 					</v-card-actions>
 				</v-card>
