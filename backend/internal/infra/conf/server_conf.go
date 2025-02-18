@@ -1,4 +1,4 @@
-package service
+package conf
 
 import (
 	"fmt"
@@ -10,26 +10,20 @@ import (
 )
 
 const (
-	ConfigServiceKey         = "config"
-	ValidatorServiceKey      = "validator"
-	UserRepositoryServiceKey = "user_repository"
-)
-
-const (
 	falseStr = "false"
 	trueStr  = "true"
 )
 
-type Config struct {
+type ServerConfig struct {
 	Server   Server
 	Sentry   Sentry
 	Redis    Redis
 	Postgres Postgres
 }
 
-func LoadConfig() (Config, error) {
+func LoadConfig() (ServerConfig, error) {
 	var (
-		config Config
+		config ServerConfig
 		err    error
 	)
 

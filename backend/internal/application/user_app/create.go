@@ -37,7 +37,7 @@ func CreateUser(
 	return &userDto, nil
 }
 
-//func (h UserEndpoints) CreateUser(
+//func (h Services) CreateUser(
 //	ctx context.Context,
 //	req *protobuf.CreateUserRequest,
 //) (*protobuf.CreateUserResponse, error) {

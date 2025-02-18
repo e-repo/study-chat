@@ -1,8 +1,8 @@
-package service
+package locator
 
 const DefaultLocatorServices = 100
 
-type LocatorInterface interface {
+type ServiceLocator interface {
 	Add(key string, service interface{})
 	Get(key string) interface{}
 	Remove(key string)

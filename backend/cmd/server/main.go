@@ -3,13 +3,12 @@ package main
 import (
 	"log/slog"
 	"os"
-	"study-chat/internal/infra/service"
-
 	"study-chat/internal"
+	"study-chat/internal/infra/conf"
 )
 
 func main() {
-	cfg, err := service.LoadConfig()
+	cfg, err := conf.LoadConfig()
 	if err != nil {
 		slog.Error("Could not load config", "err", err)
 		os.Exit(1)

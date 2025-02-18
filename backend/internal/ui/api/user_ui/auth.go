@@ -15,7 +15,7 @@ type Request struct {
 	Password string `json:"password" validate:"required,min=4,max=100"`
 }
 
-func (s UserEndpoints) PostAuth(c echo.Context) error {
+func (s Services) PostAuth(c echo.Context) error {
 	var userReq Request
 	var errs validator.ValidationErrors
 
@@ -23,21 +23,19 @@ func (s UserEndpoints) PostAuth(c echo.Context) error {
 		return err
 	}
 
-	validatorSrv := getValidatorService(s.locator)
-	if err := validatorSrv.Validate.Struct(userReq); err != nil {
+	if err := s.Validator().Validate.Struct(userReq); err != nil {
 		errors.As(err, &errs)
-		return echo.NewHTTPError(http.StatusBadRequest, errs.Translate(validatorSrv.Trans))
+		return echo.NewHTTPError(http.StatusBadRequest, errs.Translate(s.Validator().Trans))
 	}
 
-	cfg := getConfig(s.locator)
 	command := userapp.NewAuthUserCommand(
 		userReq.Email,
 		userReq.Password,
-		cfg.Server.HmacSecretKey,
+		s.HmacSecretKey(),
 	)
 
 	ctx := c.Request().Context()
-	userRepo := getUserRepo(s.locator)
+	userRepo := s.UserRepo()
 	jwt, err := userapp.AuthUser(command, ctx, userRepo)
 	if err != nil {
 		msg := err.Error()

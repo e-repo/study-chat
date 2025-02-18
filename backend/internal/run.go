@@ -7,49 +7,32 @@ import (
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 	"golang.org/x/sync/errgroup"
-	hasql "golang.yandex/hasql/sqlx"
 	"log/slog"
 	"net/http"
 	_ "net/http/pprof" //nolint:gosec // pprof port is not exposed to the internet
 	"os"
 	"os/signal"
 	"strings"
-	"study-chat/internal/infra/service"
+	"study-chat/internal/infra/conf"
 	"study-chat/internal/ui/api"
 
-	userinfra "study-chat/internal/infra/user_infra"
 	"study-chat/pkg/logger"
-	"study-chat/pkg/postgres"
 	"study-chat/pkg/sentry"
 )
 
-func Run(cfg service.Config) error {
+func Run(cfg conf.ServerConfig) error {
 	if err := sentry.Init(cfg.Sentry.DSN, cfg.Sentry.Environment); err != nil {
 		return fmt.Errorf("failed to init sentry: %w", err)
 	}
 	logger.Setup()
 
-	connData, err := postgres.NewConnectionData(
-		cfg.Postgres.Hosts,
-		cfg.Postgres.Database,
-		cfg.Postgres.User,
-		cfg.Postgres.Password,
-		cfg.Postgres.Port,
-		cfg.Postgres.SSL,
-	)
-	if err != nil {
-		return fmt.Errorf("failed to init postgres connection data: %w", err)
-	}
-	cluster, err := postgres.InitCluster(context.Background(), connData)
-	if err != nil {
-		return fmt.Errorf("failed to init postgres cluster: %w", err)
-	}
-
 	g, ctx := errgroup.WithContext(context.Background())
 	ctx, stop := signal.NotifyContext(ctx, os.Interrupt)
 	defer stop()
 
-	startServers(ctx, g, cluster, cfg)
+	if err := startServers(ctx, g, cfg); err != nil {
+		return err
+	}
 	if cfg.Server.PprofPort != "" {
 		startPprofServer(ctx, g, cfg)
 	}
@@ -60,8 +43,11 @@ func Run(cfg service.Config) error {
 	return nil
 }
 
-func startServers(ctx context.Context, g *errgroup.Group, cluster *hasql.Cluster, cfg service.Config) {
-	locator := initLocator(cluster, cfg)
+func startServers(ctx context.Context, g *errgroup.Group, cfg conf.ServerConfig) error {
+	locator, err := conf.InitLocator(cfg)
+	if err != nil {
+		return err
+	}
 
 	httpServer := api.SetupHTTPServer(locator)
 	//grpcServer := application.SetupGRPCServer(userRepo, orderRepo, productRepo)
@@ -98,9 +84,11 @@ func startServers(ctx context.Context, g *errgroup.Group, cluster *hasql.Cluster
 		}
 		return nil
 	})
+
+	return nil
 }
 
-func startPprofServer(ctx context.Context, g *errgroup.Group, cfg service.Config) {
+func startPprofServer(ctx context.Context, g *errgroup.Group, cfg conf.ServerConfig) {
 	pprofAddress := "0.0.0.0:" + cfg.Server.PprofPort
 	//nolint:gosec // pprofServer is not exposed to the internet
 	pprofServer := &http.Server{Addr: pprofAddress, Handler: http.DefaultServeMux}
@@ -122,16 +110,4 @@ func startPprofServer(ctx context.Context, g *errgroup.Group, cfg service.Config
 		}
 		return nil
 	})
-}
-
-func initLocator(cluster *hasql.Cluster, cfg service.Config) service.LocatorInterface {
-	locator := service.NewLocator()
-	userRepo := userinfra.NewPostgres(cluster)
-	validatorComp := service.NewRuValidator()
-
-	locator.Add(service.ValidatorServiceKey, validatorComp)
-	locator.Add(service.ConfigServiceKey, cfg)
-	locator.Add(service.UserRepositoryServiceKey, userRepo)
-
-	return locator
 }

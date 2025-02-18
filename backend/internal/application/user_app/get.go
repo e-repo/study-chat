@@ -1,7 +1,7 @@
 package user_app
 
 //nolint:stylecheck // fit to generated code
-//func (h UserEndpoints) GetUsersId(c echo.Context, Id openapi_types.UUID) error {
+//func (h Services) GetUsersId(c echo.Context, Id openapi_types.UUID) error {
 //	user, err := h.repo.GetUserById(c.Request().Context(), Id)
 //	if err != nil {
 //		msg := err.Error()
@@ -20,7 +20,7 @@ package user_app
 //	})
 //}
 //
-//func (h UserEndpoints) GetUserById(ctx context.Context, req *protobuf.GetUserRequest) (*protobuf.GetUserResponse, error) {
+//func (h Services) GetUserById(ctx context.Context, req *protobuf.GetUserRequest) (*protobuf.GetUserResponse, error) {
 //	uid, err := uuid.Parse(req.GetId())
 //	if err != nil {
 //		return nil, status.Error(codes.InvalidArgument, "invalid UUID")

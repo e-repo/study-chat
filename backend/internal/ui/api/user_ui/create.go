@@ -9,7 +9,7 @@ import (
 	userdmn "study-chat/internal/domain/user_dmn"
 )
 
-func (s UserEndpoints) PostUsers(c echo.Context) error {
+func (s Services) PostUsers(c echo.Context) error {
 	ctx := c.Request().Context()
 	var userReq openapi.CreateUserRequest
 	if err := c.Bind(&userReq); err != nil {
@@ -22,7 +22,7 @@ func (s UserEndpoints) PostUsers(c echo.Context) error {
 		userReq.Password,
 	)
 
-	userRepo := getUserRepo(s.locator)
+	userRepo := s.UserRepo()
 	user, err := userapp.CreateUser(command, ctx, userRepo)
 
 	if err != nil {
