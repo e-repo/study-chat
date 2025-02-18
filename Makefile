@@ -55,10 +55,14 @@ chat-init: docker-down chat-node-build chat-node-init
 
 down: docker-down
 ps: docker-ps
+up: docker-up
 
 ch-up: chat-node-up
 ch-serve: chat-serve
 
+
+docker-up:
+	@docker compose up -d
 
 chat-serve:
 	@docker exec -it $(NODE_CONTAINER_NAME) yarn dev

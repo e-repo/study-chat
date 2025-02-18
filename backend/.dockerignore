@@ -1,0 +1,4 @@
+.github
+.golangci.yml
+.pre-commit-config.yaml
+check-go-generate.sh
