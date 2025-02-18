@@ -23,8 +23,9 @@ func AuthUser(
 	}
 
 	jwtPayload := &JwtPayload{
-		Id:    user.ID(),
-		Email: user.Email(),
+		Id:        user.ID(),
+		FirstName: user.FirstName(),
+		Email:     user.Email(),
 	}
 
 	jwt, err := NewJwt(jwtPayload, JwtDuration, command.HmacSecretKey())

@@ -3,9 +3,14 @@ export
 
 .PHONY: help unit_test integration_test test lint coverage_report cpu_profile mem_profile migrate_up migrate_down create_migration
 
+#backend services
+BACKEND_SERVICE=backend
+BACKEND_DB=postgres
+BACKEND_CONTAINER_NAME=chat-go
+
 # frontend services
-CHAT_NODE=node
-NODE_CONTAINER_NAME=chat-node
+FRONTEND_SERVICE=node
+FRONT_CONTAINER_NAME=chat-node
 
 help:
 	cat Makefile
@@ -50,25 +55,33 @@ mem-profile:
 
 DB_URL=postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOSTS):$(POSTGRES_PORT)/$(POSTGRES_DATABASE)?sslmode=$(if $(filter $(POSTGRES_SSL),true),require,disable)
 
-chat-init: docker-down chat-node-build chat-node-init
+chat-init: docker-down front-build front-init
 
 
 down: docker-down
 ps: docker-ps
 up: docker-up
 
-ch-up: chat-node-up
+bd-build: backend-build
+db-up: database-up
+ch-up: front-up
 ch-serve: chat-serve
 
+
+database-up:
+	@docker compose up -d -- $(BACKEND_DB)
+
+backend-build:
+	@docker compose build -- $(BACKEND_SERVICE)
 
 docker-up:
 	@docker compose up -d
 
 chat-serve:
-	@docker exec -it $(NODE_CONTAINER_NAME) yarn dev
+	@docker exec -it $(FRONT_CONTAINER_NAME) yarn dev
 
 chat-shell:
-	@docker exec -it $(NODE_CONTAINER_NAME) sh
+	@docker exec -it $(FRONT_CONTAINER_NAME) sh
 
 docker-ps:
 	@docker compose ps
@@ -85,11 +98,11 @@ migrate-down:
 create-migration:
 	migrate create -ext sql -dir ./backend/migrations $(name)
 
-chat-node-up:
-	docker compose up -d -- $(CHAT_NODE)
+front-up:
+	docker compose up -d -- $(FRONTEND_SERVICE)
 
-chat-node-build:
-	docker compose build -- $(CHAT_NODE)
+front-build:
+	docker compose build -- $(FRONTEND_SERVICE)
 
-chat-node-init:
-	docker compose run --rm $(CHAT_NODE) yarn install
+front-init:
+	docker compose run --rm $(FRONTEND_SERVICE) yarn install

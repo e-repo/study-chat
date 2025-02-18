@@ -9,8 +9,9 @@ import (
 type Jwt string
 
 type JwtPayload struct {
-	Id    uuid.UUID
-	Email string
+	Id        uuid.UUID
+	FirstName string
+	Email     string
 }
 
 func NewJwt(
@@ -19,9 +20,10 @@ func NewJwt(
 	hmacSecretKey string,
 ) (Jwt, error) {
 	claims := jwt.MapClaims{
-		"sub":   payload.Id,
-		"email": payload.Email,
-		"exp":   time.Now().Add(duration).Unix(),
+		"sub":       payload.Id,
+		"firstName": payload.FirstName,
+		"email":     payload.Email,
+		"exp":       time.Now().Add(duration).Unix(),
 	}
 
 	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(hmacSecretKey))

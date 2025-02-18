@@ -10,7 +10,7 @@ interface AuthStoreUser {
 
 interface UserToken {
 	token: string,
-	refreshToken: string,
+	// refreshToken: string,
 }
 
 export interface AuthStore {
@@ -25,10 +25,10 @@ export interface UserFromToken
 	roles: string[];
 }
 
-interface TokenPayload {
-	user: UserFromToken;
-	username: string;
-}
+// interface TokenPayload {
+// 	user: UserFromToken;
+// 	username: string;
+// }
 
 export const useUserModel = defineStore({
 	id: 'user',
@@ -42,31 +42,16 @@ export const useUserModel = defineStore({
 	} as AuthStore),
 
 	actions: {
-		async singIn(username: string, password: string) {
-			const result = await UserApi.fetchToken(username, password);
+		async singIn(email: string, password: string) {
+			const result = await UserApi.fetchToken(email, password);
 
 			this.setToken({
 				token: result.token,
-				refreshToken: result.refreshToken
+				// refreshToken: result.refreshToken
 			});
 		},
 		async signUp(user: CreateUser) {
 			await UserApi.requestCreateUser(user);
-		},
-		async block(userId: string) {
-			await UserApi.block(userId);
-		},
-		async activate(userId: string) {
-			await UserApi.activate(userId);
-		},
-		async requestResetPassword(email: string, registrationSource: string) {
-			await UserApi.requestResetPassword(email, registrationSource);
-		},
-		async confirmResetPassword(token: string, newPassword: string) {
-			await UserApi.confirmResetPassword(token, newPassword);
-		},
-		async confirmEmail(userId: string, token: string) {
-			await UserApi.confirmEmail(userId, token);
 		},
 		logout() {
 			this.$reset();
@@ -80,13 +65,13 @@ export const useUserModel = defineStore({
 
 			this.setToken({
 				token: result.token,
-				refreshToken: result.refreshToken
+				// refreshToken: result.refreshToken
 			});
 		},
 		setToken(userToken: UserToken) {
 			this.user.isAuthenticated = true;
 			this.user.token = userToken.token;
-			this.user.refreshToken = userToken.refreshToken;
+			// this.user.refreshToken = userToken.refreshToken;
 		}
 	},
 
@@ -97,7 +82,7 @@ export const useUserModel = defineStore({
 		isAuthenticated(): boolean {
 			return this.user.isAuthenticated;
 		},
-		tokenPayload(): TokenPayload | null {
+		tokenPayload(): UserFromToken | null {
 			if (null === this.user.token) {
 				return null;
 			}
@@ -111,8 +96,7 @@ export const useUserModel = defineStore({
 				throw Error('Токен не найден.');
 			}
 
-			tokenPayload.user.firstName = decodeURI(tokenPayload.user.firstName);
-			return tokenPayload.user;
+			return tokenPayload;
 		}
 	},
 

@@ -1,5 +1,5 @@
 import { AuthLayout } from '@/shared/ui/layout';
-import { useRoleUser, useRoleAdmin, useMiddlewarePipeline } from './middleware';
+import { useRoleUser, useMiddlewarePipeline } from './middleware';
 import { Middleware, MiddlewareContext, MiddlewarePayload } from './middleware/types';
 
 import {
@@ -19,18 +19,6 @@ const routes: RouteRecordRaw[] = [
 		meta: {
 			middleware: [
 				useRoleUser,
-				useRoleAdmin,
-			] as Middleware[]
-		}
-	},
-	{
-		path: '/auth/users',
-		name: 'Users',
-		component: () => import('@/pages/auth/users'),
-		meta: {
-			middleware: [
-				useRoleUser,
-				useRoleAdmin,
 			] as Middleware[]
 		}
 	},
