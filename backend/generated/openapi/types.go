@@ -35,8 +35,8 @@ type ErrorResponse struct {
 	Message *string `json:"message,omitempty"`
 }
 
-// PostAuthJSONRequestBody defines body for PostAuth for application/json ContentType.
-type PostAuthJSONRequestBody = AuthUserRequest
+// PostSignInJSONRequestBody defines body for PostSignIn for application/json ContentType.
+type PostSignInJSONRequestBody = CreateUserRequest
 
-// PostUsersJSONRequestBody defines body for PostUsers for application/json ContentType.
-type PostUsersJSONRequestBody = CreateUserRequest
+// PostSignUpJSONRequestBody defines body for PostSignUp for application/json ContentType.
+type PostSignUpJSONRequestBody = AuthUserRequest

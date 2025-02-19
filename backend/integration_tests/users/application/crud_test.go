@@ -31,7 +31,7 @@ func (s *UsersSuite) TestHTTP() {
 		var resp openapi.CreateUserResponse
 		err = json.Unmarshal(body, &resp)
 		s.Require().NoError(err, "Failed to unmarshal response body")
-		s.Require().NotEmpty(resp.Id, "Received empty users ID")
+		s.Require().NotEmpty(resp.Id, "Received empty users Id")
 
 		userID = *resp.Id
 	})

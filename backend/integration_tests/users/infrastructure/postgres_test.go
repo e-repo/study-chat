@@ -47,21 +47,21 @@ func (suite *PostgresRepoSuite) SetupSuite() {
 //	})
 //	suite.Require().NoError(err)
 //
-//	gotten, err := suite.repo.GetUserById(context.Background(), created.ID())
+//	gotten, err := suite.repo.GetUserById(context.Background(), created.Id())
 //	suite.Require().NoError(err)
 //	suite.Require().Equal(created, gotten)
 //
-//	updated, err := suite.repo.UpdateUser(context.Background(), created.ID(), func(u *domain.User) (bool, error) {
+//	updated, err := suite.repo.UpdateUser(context.Background(), created.Id(), func(u *domain.User) (bool, error) {
 //		err := u.ChangeEmail("test@test2.com")
 //		return true, err
 //	})
 //	suite.Require().NoError(err)
 //
-//	gotten, err = suite.repo.GetUserById(context.Background(), created.ID())
+//	gotten, err = suite.repo.GetUserById(context.Background(), created.Id())
 //	suite.Require().NoError(err)
 //	suite.Require().Equal(updated, gotten)
 //
-//	err = suite.repo.DeleteUser(context.Background(), created.ID())
+//	err = suite.repo.DeleteUser(context.Background(), created.Id())
 //	suite.Require().NoError(err)
 //}
 

@@ -13,14 +13,14 @@ import (
 	"os"
 	"os/signal"
 	"strings"
-	"study-chat/internal/infra/conf"
-	"study-chat/internal/ui/api"
+	"study-chat/internal/api"
+	"study-chat/internal/config"
 
 	"study-chat/pkg/logger"
 	"study-chat/pkg/sentry"
 )
 
-func Run(cfg conf.ServerConfig) error {
+func Run(cfg config.Config) error {
 	if err := sentry.Init(cfg.Sentry.DSN, cfg.Sentry.Environment); err != nil {
 		return fmt.Errorf("failed to init sentry: %w", err)
 	}
@@ -43,8 +43,8 @@ func Run(cfg conf.ServerConfig) error {
 	return nil
 }
 
-func startServers(ctx context.Context, g *errgroup.Group, cfg conf.ServerConfig) error {
-	locator, err := conf.InitLocator(cfg)
+func startServers(ctx context.Context, g *errgroup.Group, cfg config.Config) error {
+	locator, err := config.InitLocator(cfg)
 	if err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ func startServers(ctx context.Context, g *errgroup.Group, cfg conf.ServerConfig)
 	return nil
 }
 
-func startPprofServer(ctx context.Context, g *errgroup.Group, cfg conf.ServerConfig) {
+func startPprofServer(ctx context.Context, g *errgroup.Group, cfg config.Config) {
 	pprofAddress := "0.0.0.0:" + cfg.Server.PprofPort
 	//nolint:gosec // pprofServer is not exposed to the internet
 	pprofServer := &http.Server{Addr: pprofAddress, Handler: http.DefaultServeMux}

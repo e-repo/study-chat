@@ -9,12 +9,12 @@ import (
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
-	// Аутентификация пользователя (регистрация)
-	// (POST /auth)
-	PostAuth(ctx echo.Context) error
 	// Создание пользователя (регистрация)
-	// (POST /users)
-	PostUsers(ctx echo.Context) error
+	// (POST /sign-in)
+	PostSignIn(ctx echo.Context) error
+	// Аутентификация пользователя (регистрация)
+	// (POST /sign-up)
+	PostSignUp(ctx echo.Context) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -22,21 +22,21 @@ type ServerInterfaceWrapper struct {
 	Handler ServerInterface
 }
 
-// PostAuth converts echo context to params.
-func (w *ServerInterfaceWrapper) PostAuth(ctx echo.Context) error {
+// PostSignIn converts echo context to params.
+func (w *ServerInterfaceWrapper) PostSignIn(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PostAuth(ctx)
+	err = w.Handler.PostSignIn(ctx)
 	return err
 }
 
-// PostUsers converts echo context to params.
-func (w *ServerInterfaceWrapper) PostUsers(ctx echo.Context) error {
+// PostSignUp converts echo context to params.
+func (w *ServerInterfaceWrapper) PostSignUp(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PostUsers(ctx)
+	err = w.Handler.PostSignUp(ctx)
 	return err
 }
 
@@ -68,7 +68,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
-	router.POST(baseURL+"/auth", wrapper.PostAuth)
-	router.POST(baseURL+"/users", wrapper.PostUsers)
+	router.POST(baseURL+"/sign-in", wrapper.PostSignIn)
+	router.POST(baseURL+"/sign-up", wrapper.PostSignUp)
 
 }

@@ -4,11 +4,11 @@ import (
 	"log/slog"
 	"os"
 	"study-chat/internal"
-	"study-chat/internal/infra/conf"
+	"study-chat/internal/config"
 )
 
 func main() {
-	cfg, err := conf.LoadConfig()
+	cfg, err := config.LoadConfig()
 	if err != nil {
 		slog.Error("Could not load config", "err", err)
 		os.Exit(1)

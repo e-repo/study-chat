@@ -1,4 +1,4 @@
-package conf
+package config
 
 import (
 	"fmt"
@@ -14,16 +14,16 @@ const (
 	trueStr  = "true"
 )
 
-type ServerConfig struct {
+type Config struct {
 	Server   Server
 	Sentry   Sentry
 	Redis    Redis
 	Postgres Postgres
 }
 
-func LoadConfig() (ServerConfig, error) {
+func LoadConfig() (Config, error) {
 	var (
-		config ServerConfig
+		config Config
 		err    error
 	)
 

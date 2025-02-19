@@ -87,19 +87,19 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
-	// PostAuthWithBody request with any body
-	PostAuthWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// PostSignInWithBody request with any body
+	PostSignInWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	PostAuth(ctx context.Context, body PostAuthJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	PostSignIn(ctx context.Context, body PostSignInJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostUsersWithBody request with any body
-	PostUsersWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// PostSignUpWithBody request with any body
+	PostSignUpWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	PostUsers(ctx context.Context, body PostUsersJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	PostSignUp(ctx context.Context, body PostSignUpJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
-func (c *Client) PostAuthWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostAuthRequestWithBody(c.Server, contentType, body)
+func (c *Client) PostSignInWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostSignInRequestWithBody(c.Server, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -110,8 +110,8 @@ func (c *Client) PostAuthWithBody(ctx context.Context, contentType string, body 
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostAuth(ctx context.Context, body PostAuthJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostAuthRequest(c.Server, body)
+func (c *Client) PostSignIn(ctx context.Context, body PostSignInJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostSignInRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -122,8 +122,8 @@ func (c *Client) PostAuth(ctx context.Context, body PostAuthJSONRequestBody, req
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostUsersWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostUsersRequestWithBody(c.Server, contentType, body)
+func (c *Client) PostSignUpWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostSignUpRequestWithBody(c.Server, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -134,8 +134,8 @@ func (c *Client) PostUsersWithBody(ctx context.Context, contentType string, body
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostUsers(ctx context.Context, body PostUsersJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostUsersRequest(c.Server, body)
+func (c *Client) PostSignUp(ctx context.Context, body PostSignUpJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostSignUpRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -146,19 +146,19 @@ func (c *Client) PostUsers(ctx context.Context, body PostUsersJSONRequestBody, r
 	return c.Client.Do(req)
 }
 
-// NewPostAuthRequest calls the generic PostAuth builder with application/json body
-func NewPostAuthRequest(server string, body PostAuthJSONRequestBody) (*http.Request, error) {
+// NewPostSignInRequest calls the generic PostSignIn builder with application/json body
+func NewPostSignInRequest(server string, body PostSignInJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewPostAuthRequestWithBody(server, "application/json", bodyReader)
+	return NewPostSignInRequestWithBody(server, "application/json", bodyReader)
 }
 
-// NewPostAuthRequestWithBody generates requests for PostAuth with any type of body
-func NewPostAuthRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+// NewPostSignInRequestWithBody generates requests for PostSignIn with any type of body
+func NewPostSignInRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -166,7 +166,7 @@ func NewPostAuthRequestWithBody(server string, contentType string, body io.Reade
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/auth")
+	operationPath := fmt.Sprintf("/sign-in")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -186,19 +186,19 @@ func NewPostAuthRequestWithBody(server string, contentType string, body io.Reade
 	return req, nil
 }
 
-// NewPostUsersRequest calls the generic PostUsers builder with application/json body
-func NewPostUsersRequest(server string, body PostUsersJSONRequestBody) (*http.Request, error) {
+// NewPostSignUpRequest calls the generic PostSignUp builder with application/json body
+func NewPostSignUpRequest(server string, body PostSignUpJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewPostUsersRequestWithBody(server, "application/json", bodyReader)
+	return NewPostSignUpRequestWithBody(server, "application/json", bodyReader)
 }
 
-// NewPostUsersRequestWithBody generates requests for PostUsers with any type of body
-func NewPostUsersRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+// NewPostSignUpRequestWithBody generates requests for PostSignUp with any type of body
+func NewPostSignUpRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -206,7 +206,7 @@ func NewPostUsersRequestWithBody(server string, contentType string, body io.Read
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/users")
+	operationPath := fmt.Sprintf("/sign-up")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -269,43 +269,18 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
-	// PostAuthWithBodyWithResponse request with any body
-	PostAuthWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAuthResponse, error)
+	// PostSignInWithBodyWithResponse request with any body
+	PostSignInWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostSignInResponse, error)
 
-	PostAuthWithResponse(ctx context.Context, body PostAuthJSONRequestBody, reqEditors ...RequestEditorFn) (*PostAuthResponse, error)
+	PostSignInWithResponse(ctx context.Context, body PostSignInJSONRequestBody, reqEditors ...RequestEditorFn) (*PostSignInResponse, error)
 
-	// PostUsersWithBodyWithResponse request with any body
-	PostUsersWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostUsersResponse, error)
+	// PostSignUpWithBodyWithResponse request with any body
+	PostSignUpWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostSignUpResponse, error)
 
-	PostUsersWithResponse(ctx context.Context, body PostUsersJSONRequestBody, reqEditors ...RequestEditorFn) (*PostUsersResponse, error)
+	PostSignUpWithResponse(ctx context.Context, body PostSignUpJSONRequestBody, reqEditors ...RequestEditorFn) (*PostSignUpResponse, error)
 }
 
-type PostAuthResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON201      *AuthUserResponse
-	JSON400      *ErrorResponse
-	JSON409      *ErrorResponse
-	JSON500      *ErrorResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r PostAuthResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r PostAuthResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type PostUsersResponse struct {
+type PostSignInResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON201      *CreateUserResponse
@@ -315,7 +290,7 @@ type PostUsersResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r PostUsersResponse) Status() string {
+func (r PostSignInResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -323,63 +298,88 @@ func (r PostUsersResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r PostUsersResponse) StatusCode() int {
+func (r PostSignInResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-// PostAuthWithBodyWithResponse request with arbitrary body returning *PostAuthResponse
-func (c *ClientWithResponses) PostAuthWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAuthResponse, error) {
-	rsp, err := c.PostAuthWithBody(ctx, contentType, body, reqEditors...)
+type PostSignUpResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *AuthUserResponse
+	JSON400      *ErrorResponse
+	JSON409      *ErrorResponse
+	JSON500      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r PostSignUpResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostSignUpResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// PostSignInWithBodyWithResponse request with arbitrary body returning *PostSignInResponse
+func (c *ClientWithResponses) PostSignInWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostSignInResponse, error) {
+	rsp, err := c.PostSignInWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePostAuthResponse(rsp)
+	return ParsePostSignInResponse(rsp)
 }
 
-func (c *ClientWithResponses) PostAuthWithResponse(ctx context.Context, body PostAuthJSONRequestBody, reqEditors ...RequestEditorFn) (*PostAuthResponse, error) {
-	rsp, err := c.PostAuth(ctx, body, reqEditors...)
+func (c *ClientWithResponses) PostSignInWithResponse(ctx context.Context, body PostSignInJSONRequestBody, reqEditors ...RequestEditorFn) (*PostSignInResponse, error) {
+	rsp, err := c.PostSignIn(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePostAuthResponse(rsp)
+	return ParsePostSignInResponse(rsp)
 }
 
-// PostUsersWithBodyWithResponse request with arbitrary body returning *PostUsersResponse
-func (c *ClientWithResponses) PostUsersWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostUsersResponse, error) {
-	rsp, err := c.PostUsersWithBody(ctx, contentType, body, reqEditors...)
+// PostSignUpWithBodyWithResponse request with arbitrary body returning *PostSignUpResponse
+func (c *ClientWithResponses) PostSignUpWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostSignUpResponse, error) {
+	rsp, err := c.PostSignUpWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePostUsersResponse(rsp)
+	return ParsePostSignUpResponse(rsp)
 }
 
-func (c *ClientWithResponses) PostUsersWithResponse(ctx context.Context, body PostUsersJSONRequestBody, reqEditors ...RequestEditorFn) (*PostUsersResponse, error) {
-	rsp, err := c.PostUsers(ctx, body, reqEditors...)
+func (c *ClientWithResponses) PostSignUpWithResponse(ctx context.Context, body PostSignUpJSONRequestBody, reqEditors ...RequestEditorFn) (*PostSignUpResponse, error) {
+	rsp, err := c.PostSignUp(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePostUsersResponse(rsp)
+	return ParsePostSignUpResponse(rsp)
 }
 
-// ParsePostAuthResponse parses an HTTP response from a PostAuthWithResponse call
-func ParsePostAuthResponse(rsp *http.Response) (*PostAuthResponse, error) {
+// ParsePostSignInResponse parses an HTTP response from a PostSignInWithResponse call
+func ParsePostSignInResponse(rsp *http.Response) (*PostSignInResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &PostAuthResponse{
+	response := &PostSignInResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
-		var dest AuthUserResponse
+		var dest CreateUserResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -411,22 +411,22 @@ func ParsePostAuthResponse(rsp *http.Response) (*PostAuthResponse, error) {
 	return response, nil
 }
 
-// ParsePostUsersResponse parses an HTTP response from a PostUsersWithResponse call
-func ParsePostUsersResponse(rsp *http.Response) (*PostUsersResponse, error) {
+// ParsePostSignUpResponse parses an HTTP response from a PostSignUpWithResponse call
+func ParsePostSignUpResponse(rsp *http.Response) (*PostSignUpResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &PostUsersResponse{
+	response := &PostSignUpResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
-		var dest CreateUserResponse
+		var dest AuthUserResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

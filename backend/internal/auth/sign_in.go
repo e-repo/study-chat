@@ -1,4 +1,4 @@
-package user_ui
+package auth
 
 import (
 	"errors"
@@ -6,8 +6,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"study-chat/generated/openapi"
-	userapp "study-chat/internal/application/user_app"
-	userdmn "study-chat/internal/domain/user_dmn"
 )
 
 type Request struct {
@@ -15,7 +13,7 @@ type Request struct {
 	Password string `json:"password" validate:"required,min=4,max=100"`
 }
 
-func (s Services) PostAuth(c echo.Context) error {
+func (a Auth) PostSignIn(c echo.Context) error {
 	var userReq Request
 	var errs validator.ValidationErrors
 
@@ -23,23 +21,22 @@ func (s Services) PostAuth(c echo.Context) error {
 		return err
 	}
 
-	if err := s.Validator().Validate.Struct(userReq); err != nil {
+	if err := a.validator.Validate.Struct(userReq); err != nil {
 		errors.As(err, &errs)
-		return echo.NewHTTPError(http.StatusBadRequest, errs.Translate(s.Validator().Trans))
+		return echo.NewHTTPError(http.StatusBadRequest, errs.Translate(a.validator.Trans))
 	}
 
-	command := userapp.NewAuthUserCommand(
-		userReq.Email,
-		userReq.Password,
-		s.HmacSecretKey(),
-	)
+	signIn := &SignIn{
+		email:         userReq.Email,
+		password:      userReq.Password,
+		hmacSecretKey: a.hmacSecretKey,
+	}
 
 	ctx := c.Request().Context()
-	userRepo := s.UserRepo()
-	jwt, err := userapp.AuthUser(command, ctx, userRepo)
+	jwt, err := a.service.SignIn(ctx, signIn)
 	if err != nil {
 		msg := err.Error()
-		if errors.Is(err, userdmn.ErrUserNotFound) || errors.Is(err, userdmn.ErrInvalidPassword) {
+		if errors.Is(err, ErrUserNotFound) || errors.Is(err, ErrInvalidPassword) {
 			return c.JSON(http.StatusBadRequest, openapi.ErrorResponse{Message: &msg})
 		}
 		return c.JSON(http.StatusInternalServerError, openapi.ErrorResponse{Message: &msg})

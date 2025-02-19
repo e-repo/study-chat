@@ -1,4 +1,4 @@
-package user_infra
+package auth
 
 import (
 	"context"
@@ -6,22 +6,28 @@ import (
 
 	"github.com/google/uuid"
 	hasql "golang.yandex/hasql/sqlx"
-
-	domain "study-chat/internal/domain/user_dmn"
 )
 
-type userDB struct {
-	ID        uuid.UUID `db:"id"`
+type User struct {
+	Id        uuid.UUID `db:"id"`
 	FirstName string    `db:"first_name"`
 	Email     string    `db:"email"`
 	Password  string    `db:"password"`
+}
+
+type UserRepository interface {
+	CreateUser(ctx context.Context, user *User) (*User, error)
+	UpdateUser(ctx context.Context, id uuid.UUID, updateFn func(*User) (bool, error)) (*User, error)
+	GetUserById(ctx context.Context, id uuid.UUID) (*User, error)
+	GetUserByEmail(ctx context.Context, email string) (*User, error)
+	CheckUserExist(ctx context.Context, email string) (bool, error)
 }
 
 type PostgresRepo struct {
 	cluster *hasql.Cluster
 }
 
-func NewPostgres(cluster *hasql.Cluster) *PostgresRepo {
+func NewUserRepository(cluster *hasql.Cluster) UserRepository {
 	return &PostgresRepo{
 		cluster: cluster,
 	}
@@ -29,21 +35,15 @@ func NewPostgres(cluster *hasql.Cluster) *PostgresRepo {
 
 func (r *PostgresRepo) CreateUser(
 	ctx context.Context,
-	user *domain.User,
-) (*domain.User, error) {
+	user *User,
+) (*User, error) {
 	db := r.cluster.Primary().DBx()
 
-	userDB := userDB{
-		ID:        user.ID(),
-		FirstName: user.FirstName(),
-		Email:     user.Email(),
-		Password:  user.PassHash(),
-	}
 	query := `
 		INSERT INTO "user" (id, first_name, email, password)
 		VALUES (:id, :first_name, :email, :password)
 	`
-	_, err := db.NamedExecContext(ctx, query, userDB)
+	_, err := db.NamedExecContext(ctx, query, user)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка сохранения пользователя: %w", err)
 	}
@@ -54,8 +54,8 @@ func (r *PostgresRepo) CreateUser(
 func (r *PostgresRepo) UpdateUser(
 	ctx context.Context,
 	id uuid.UUID,
-	updateFn func(*domain.User) (bool, error),
-) (*domain.User, error) {
+	updateFn func(*User) (bool, error),
+) (*User, error) {
 	db := r.cluster.Primary().DBx()
 	user, err := r.GetUserById(ctx, id)
 	if err != nil {
@@ -68,32 +68,20 @@ func (r *PostgresRepo) UpdateUser(
 	if !updated {
 		return user, nil
 	}
-	userDB := userDB{
-		ID:        user.ID(),
-		FirstName: user.FirstName(),
-		Email:     user.Email(),
-		Password:  user.PassHash(),
-	}
 	query := `
 		UPDATE "user"
 		SET first_name = :first_name, email = :email, password = :password
 		WHERE id = :id
 	`
-	_, err = db.NamedExecContext(ctx, query, userDB)
+	_, err = db.NamedExecContext(ctx, query, user)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка обновления пользователя: %w", err)
 	}
 	return user, nil
 }
 
-func (r *PostgresRepo) SaveUser(ctx context.Context, entity domain.User) error {
+func (r *PostgresRepo) SaveUser(ctx context.Context, user User) error {
 	db := r.cluster.Primary().DBx()
-	user := userDB{
-		ID:        entity.ID(),
-		FirstName: entity.FirstName(),
-		Email:     entity.Email(),
-		Password:  entity.PassHash(),
-	}
 	query := `
 		INSERT INTO "user" (id, first_name, email, password)
 		VALUES (:id, :name, :email)
@@ -106,45 +94,24 @@ func (r *PostgresRepo) SaveUser(ctx context.Context, entity domain.User) error {
 	return nil
 }
 
-func (r *PostgresRepo) GetUserById(ctx context.Context, id uuid.UUID) (*domain.User, error) {
+func (r *PostgresRepo) GetUserById(ctx context.Context, id uuid.UUID) (*User, error) {
 	db := r.cluster.StandbyPreferred().DBx()
-	var user userDB
+	var user User
 	query := `SELECT id, first_name, email FROM "user" WHERE id = $1`
 	if err := db.GetContext(ctx, &user, query, id); err != nil {
 		return nil, fmt.Errorf("ошибка получения пользователя: %w", err)
 	}
-	entity, err := domain.NewUser(
-		&domain.UserDto{
-			Id:       user.ID,
-			FistName: user.FirstName,
-			Email:    user.Email,
-		},
-	)
-	if err != nil {
-		return nil, fmt.Errorf("ошибка инициализации пользователя: %w", err)
-	}
-	return entity, nil
+	return &user, nil
 }
 
-func (r *PostgresRepo) GetUserByEmail(ctx context.Context, email string) (*domain.User, error) {
+func (r *PostgresRepo) GetUserByEmail(ctx context.Context, email string) (*User, error) {
 	db := r.cluster.StandbyPreferred().DBx()
-	var user userDB
+	var user User
 	query := `SELECT id, first_name, email, password FROM "user" WHERE email = $1`
 	if err := db.GetContext(ctx, &user, query, email); err != nil {
 		return nil, fmt.Errorf("ошибка получения пользователя: %w", err)
 	}
-	entity, err := domain.NewUser(
-		&domain.UserDto{
-			Id:       user.ID,
-			FistName: user.FirstName,
-			Email:    user.Email,
-			PassHash: user.Password,
-		},
-	)
-	if err != nil {
-		return nil, fmt.Errorf("ошибка инициализации пользователя: %w", err)
-	}
-	return entity, nil
+	return &user, nil
 }
 
 func (r *PostgresRepo) DeleteUser(ctx context.Context, id uuid.UUID) error {

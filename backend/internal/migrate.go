@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"study-chat/internal/infra/conf"
+	"study-chat/internal/config"
 
 	"study-chat/pkg/logger"
 	"study-chat/pkg/sentry"
@@ -16,7 +16,7 @@ import (
 	"study-chat/pkg/postgres"
 )
 
-func Migrate(cfg conf.ServerConfig) error {
+func Migrate(cfg config.Config) error {
 	if err := sentry.Init(cfg.Sentry.DSN, cfg.Sentry.Environment); err != nil {
 		return fmt.Errorf("failed to init sentry: %w", err)
 	}

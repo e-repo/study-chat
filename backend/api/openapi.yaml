@@ -3,7 +3,7 @@ info:
   title: Модуль авторизации для чата
   version: 0.0.1
 paths:
-  /users:
+  /sign-in:
     post:
       summary: Создание пользователя (регистрация)
       description: Создание нового пользователя по имени и email
@@ -41,7 +41,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /auth:
+  /sign-up:
     post:
       summary: Аутентификация пользователя (регистрация)
       description: Аутентификация пользователя по email и паролю

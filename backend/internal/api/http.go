@@ -3,7 +3,7 @@ package api
 import (
 	"github.com/labstack/echo/v4"
 	"net/http"
-	"study-chat/internal/ui/api/user_ui"
+	"study-chat/internal/auth"
 	"study-chat/pkg/locator"
 
 	"study-chat/generated/openapi"
@@ -13,7 +13,7 @@ import (
 )
 
 type httpServer struct {
-	user_ui.Services
+	auth.Auth
 }
 
 func SetupHTTPServer(locator locator.ServiceLocator) *echo.Echo {
@@ -30,7 +30,7 @@ func SetupHTTPServer(locator locator.ServiceLocator) *echo.Echo {
 	setupPingEndpoint(e)
 
 	server := httpServer{}
-	server.Services = user_ui.SetupEndpoints(locator)
+	server.Auth = auth.SetupEndpoints(locator)
 
 	openapi.RegisterHandlers(e, server)
 

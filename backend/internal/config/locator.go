@@ -1,12 +1,12 @@
-package conf
+package config
 
 import (
 	"context"
 	"fmt"
 	hasql "golang.yandex/hasql/sqlx"
-	"study-chat/internal/infra/service"
 	"study-chat/pkg/locator"
 	"study-chat/pkg/postgres"
+	"study-chat/pkg/validator"
 )
 
 const (
@@ -15,12 +15,9 @@ const (
 	ClusterServiceKey   = "cluster"
 )
 
-type ParameterBag struct {
-}
-
-func InitLocator(cfg ServerConfig) (locator.ServiceLocator, error) {
+func InitLocator(cfg Config) (locator.ServiceLocator, error) {
 	serviceLoc := locator.NewLocator()
-	validatorCmp := service.NewRuValidator()
+	validatorCmp := validator.NewRuValidator()
 
 	cluster, err := initCluster(cfg)
 	if err != nil {
@@ -34,7 +31,7 @@ func InitLocator(cfg ServerConfig) (locator.ServiceLocator, error) {
 	return serviceLoc, nil
 }
 
-func initCluster(cfg ServerConfig) (*hasql.Cluster, error) {
+func initCluster(cfg Config) (*hasql.Cluster, error) {
 	connData, err := postgres.NewConnectionData(
 		cfg.Postgres.Hosts,
 		cfg.Postgres.Database,
