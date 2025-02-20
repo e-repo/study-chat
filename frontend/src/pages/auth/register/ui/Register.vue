@@ -22,7 +22,7 @@
             <v-alert
                 v-if="createUserForm.isCreated"
                 text="Вы успешно зарегистрированны! Перейдите на форму входа для заполнения учетных данных, или дождитесь автоматического перехода через 5сек."
-                type="error"
+                type="success"
                 variant="outlined"
             ></v-alert>
           </v-card-item>

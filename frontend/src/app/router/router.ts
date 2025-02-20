@@ -32,7 +32,7 @@ const routes: RouteRecordRaw[] = [
 	},
 	{
 		path: '/register',
-		name: 'RequestResetPassword',
+		name: 'Register',
 		component: () => import('@/pages/auth/register'),
 		meta: {
 			layout: AuthLayout,

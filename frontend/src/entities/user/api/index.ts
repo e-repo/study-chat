@@ -5,7 +5,7 @@ const httpBearerToken = useHttpBearerToken();
 
 export const fetchToken = async (email: string, password: string) => {
 	return (
-		await http.post('/auth', {
+		await http.post('/sign-in', {
 			email,
 			password
 		})
@@ -14,7 +14,7 @@ export const fetchToken = async (email: string, password: string) => {
 
 export const refreshToken = async (refreshToken: string) => {
 	return (
-		await http.post('/auth/token-refresh', {
+		await http.post('/token-refresh', {
 			refreshToken
 		})
 	).data;
@@ -23,7 +23,7 @@ export const refreshToken = async (refreshToken: string) => {
 export const requestCreateUser = async (user: CreateUser) => {
 	try {
 		return (
-			await httpBearerToken.post('/users', user)
+			await httpBearerToken.post('/sign-up', user)
 		).data;
 	} catch (error: unknown) {
 		tryRefreshToken(error);

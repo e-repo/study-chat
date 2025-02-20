@@ -26,11 +26,11 @@ module.exports = {
 		'ecmaVersion': 'latest',
 		'parser': '@typescript-eslint/parser',
 		'sourceType': 'module',
-		'jsx': true
+		// 'jsx': true
 	},
-	'compilerOptions': {
-		'jsx': 'preserve'
-	},
+	// 'compilerOptions': {
+	// 	'jsx': 'preserve'
+	// },
 	'plugins': [
 		'@typescript-eslint',
 		'vue'

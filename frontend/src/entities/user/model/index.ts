@@ -42,7 +42,7 @@ export const useUserModel = defineStore({
 	} as AuthStore),
 
 	actions: {
-		async singIn(email: string, password: string) {
+		async signIn(email: string, password: string) {
 			const result = await UserApi.fetchToken(email, password);
 
 			this.setToken({
