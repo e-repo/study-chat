@@ -2,25 +2,39 @@ package auth
 
 import (
 	"errors"
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"study-chat/generated/openapi"
 )
 
+type RequestSignUp struct {
+	FirstName string `json:"first_name" validate:"required,min=4,max=100"`
+	Email     string `json:"email" validate:"required,email,max=100"`
+	Password  string `json:"password" validate:"required,min=4,max=100"`
+}
+
 func (a Auth) PostSignUp(c echo.Context) error {
+	var request RequestSignUp
+	var errs validator.ValidationErrors
+
 	ctx := c.Request().Context()
-	var userReq openapi.CreateUserRequest
-	if err := c.Bind(&userReq); err != nil {
+	if err := c.Bind(&request); err != nil {
 		return err
 	}
 
-	signUp := SignUp{
-		fistName: userReq.FirstName,
-		email:    string(userReq.Email),
-		password: userReq.Password,
+	if err := a.validator.Validate.Struct(request); err != nil {
+		errors.As(err, &errs)
+		return echo.NewHTTPError(http.StatusBadRequest, errs.Translate(a.validator.Trans))
 	}
 
-	userId, err := a.service.SignUp(ctx, &signUp)
+	signUp := signUp{
+		fistName: request.FirstName,
+		email:    request.Email,
+		password: request.Password,
+	}
+
+	userId, err := a.service.signUp(ctx, &signUp)
 
 	if err != nil {
 		msg := err.Error()

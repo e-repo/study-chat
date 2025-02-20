@@ -19,8 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	UserService_CreateUser_FullMethodName = "/protobuf.UserService/CreateUser"
-	UserService_GetUser_FullMethodName    = "/protobuf.UserService/GetUserById"
+	UserService_CreateUser_FullMethodName = "/protobuf.UserService/createUser"
+	UserService_GetUser_FullMethodName    = "/protobuf.UserService/getUserById"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -76,10 +76,10 @@ type UserServiceServer interface {
 type UnimplementedUserServiceServer struct{}
 
 func (UnimplementedUserServiceServer) CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
+	return nil, status.Errorf(codes.Unimplemented, "method createUser not implemented")
 }
 func (UnimplementedUserServiceServer) GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUserById not implemented")
+	return nil, status.Errorf(codes.Unimplemented, "method getUserById not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 func (UnimplementedUserServiceServer) testEmbeddedByValue()                     {}
@@ -146,11 +146,11 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*UserServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "CreateUser",
+			MethodName: "createUser",
 			Handler:    _UserService_CreateUser_Handler,
 		},
 		{
-			MethodName: "GetUserById",
+			MethodName: "getUserById",
 			Handler:    _UserService_GetUser_Handler,
 		},
 	},

@@ -424,11 +424,11 @@ var file_protobuf_proto_goTypes = []any{
 }
 var file_protobuf_proto_depIdxs = []int32{
 	5, // 0: protobuf.CreateOrderRequest.items:type_name -> protobuf.OrderItem
-	0, // 1: protobuf.UserService.CreateUser:input_type -> protobuf.CreateUserRequest
-	2, // 2: protobuf.UserService.GetUserById:input_type -> protobuf.GetUserRequest
+	0, // 1: protobuf.UserService.createUser:input_type -> protobuf.CreateUserRequest
+	2, // 2: protobuf.UserService.getUserById:input_type -> protobuf.GetUserRequest
 	4, // 3: protobuf.OrderService.CreateOrder:input_type -> protobuf.CreateOrderRequest
-	1, // 4: protobuf.UserService.CreateUser:output_type -> protobuf.CreateUserResponse
-	3, // 5: protobuf.UserService.GetUserById:output_type -> protobuf.GetUserResponse
+	1, // 4: protobuf.UserService.createUser:output_type -> protobuf.CreateUserResponse
+	3, // 5: protobuf.UserService.getUserById:output_type -> protobuf.GetUserResponse
 	6, // 6: protobuf.OrderService.CreateOrder:output_type -> protobuf.CreateOrderResponse
 	4, // [4:7] is the sub-list for method output_type
 	1, // [1:4] is the sub-list for method input_type

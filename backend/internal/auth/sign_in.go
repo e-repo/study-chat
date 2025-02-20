@@ -8,32 +8,32 @@ import (
 	"study-chat/generated/openapi"
 )
 
-type Request struct {
+type RequestSignIn struct {
 	Email    string `json:"email" validate:"required,email,max=100"`
 	Password string `json:"password" validate:"required,min=4,max=100"`
 }
 
 func (a Auth) PostSignIn(c echo.Context) error {
-	var userReq Request
+	var request RequestSignIn
 	var errs validator.ValidationErrors
 
-	if err := c.Bind(&userReq); err != nil {
+	if err := c.Bind(&request); err != nil {
 		return err
 	}
 
-	if err := a.validator.Validate.Struct(userReq); err != nil {
+	if err := a.validator.Validate.Struct(request); err != nil {
 		errors.As(err, &errs)
 		return echo.NewHTTPError(http.StatusBadRequest, errs.Translate(a.validator.Trans))
 	}
 
-	signIn := &SignIn{
-		email:         userReq.Email,
-		password:      userReq.Password,
+	signIn := &signIn{
+		email:         request.Email,
+		password:      request.Password,
 		hmacSecretKey: a.hmacSecretKey,
 	}
 
 	ctx := c.Request().Context()
-	jwt, err := a.service.SignIn(ctx, signIn)
+	jwt, err := a.service.signIn(ctx, signIn)
 	if err != nil {
 		msg := err.Error()
 		if errors.Is(err, ErrUserNotFound) || errors.Is(err, ErrInvalidPassword) {

@@ -7,28 +7,28 @@ import (
 	"time"
 )
 
-type UserService struct {
-	repo UserRepository
+type userService struct {
+	repo userRepository
 }
 
-func NewUserService(userRepo UserRepository) *UserService {
-	return &UserService{repo: userRepo}
+func newUserService(userRepo userRepository) *userService {
+	return &userService{repo: userRepo}
 }
 
-type SignUp struct {
+type signUp struct {
 	fistName string
 	email    string
 	password string
 }
 
-type SignIn struct {
+type signIn struct {
 	email         string
 	password      string
 	hmacSecretKey string
 }
 
-func (u *UserService) SignIn(ctx context.Context, command *SignIn) (Jwt, error) {
-	user, err := u.repo.GetUserByEmail(ctx, command.email)
+func (u *userService) signIn(ctx context.Context, command *signIn) (jsonWebToken, error) {
+	user, err := u.repo.getUserByEmail(ctx, command.email)
 	if err != nil {
 		return "", ErrUserNotFound
 	}
@@ -36,20 +36,20 @@ func (u *UserService) SignIn(ctx context.Context, command *SignIn) (Jwt, error) 
 		return "", ErrInvalidPassword
 	}
 
-	jwtPayload := &JwtPayload{
+	jwtPayload := &jwtPayload{
 		Id:        user.Id,
 		FirstName: user.FirstName,
 		Email:     user.Email,
 	}
 
-	jwt, err := NewJwt(jwtPayload, 12*time.Hour, command.hmacSecretKey)
+	jwt, err := newJwt(jwtPayload, 12*time.Hour, command.hmacSecretKey)
 	if err != nil {
 		return "", err
 	}
 	return jwt, nil
 }
 
-func (u *UserService) SignUp(ctx context.Context, signUp *SignUp) (uuid.UUID, error) {
+func (u *userService) signUp(ctx context.Context, signUp *signUp) (uuid.UUID, error) {
 	password := []byte(signUp.password)
 
 	passHash, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
@@ -57,14 +57,14 @@ func (u *UserService) SignUp(ctx context.Context, signUp *SignUp) (uuid.UUID, er
 		return uuid.Nil, err
 	}
 
-	user := &User{
+	user := &user{
 		Id:        uuid.New(),
 		FirstName: signUp.fistName,
 		Email:     signUp.email,
 		Password:  string(passHash),
 	}
 
-	if _, err = u.repo.CreateUser(ctx, user); err != nil {
+	if _, err = u.repo.createUser(ctx, user); err != nil {
 		return uuid.Nil, err
 	}
 

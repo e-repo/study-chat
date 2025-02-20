@@ -6,19 +6,19 @@ import (
 	"time"
 )
 
-type Jwt string
+type jsonWebToken string
 
-type JwtPayload struct {
+type jwtPayload struct {
 	Id        uuid.UUID
 	FirstName string
 	Email     string
 }
 
-func NewJwt(
-	payload *JwtPayload,
+func newJwt(
+	payload *jwtPayload,
 	duration time.Duration,
 	hmacSecretKey string,
-) (Jwt, error) {
+) (jsonWebToken, error) {
 	claims := jwt.MapClaims{
 		"sub":       payload.Id,
 		"firstName": payload.FirstName,
@@ -30,5 +30,5 @@ func NewJwt(
 	if err != nil {
 		return "", err
 	}
-	return Jwt(token), nil
+	return jsonWebToken(token), nil
 }
