@@ -16,15 +16,6 @@ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
 либо просто выполнить команду `make install`
 
-### Pre-commit hooks
-
-Для установки pre-commit hooks выполните команды:
-
-```sh
-brew install pre-commit
-pre-commit install
-```
-
 ### Golang-migrate
 
 Для выполнения миграций базы данных используется утилита `golang-migrate`.
@@ -37,15 +28,15 @@ brew install golang-migrate
 Чтобы применить миграции к базе, существует make команда:
 
 ```shell
-make migrate_up
+make migrate-up
 ```
 
 Также для отката миграций (параметр `count` указывает количество миграций, которые нужно откатить):
 ```shell
-make migrate_down count=1
+make migrate-down count=1
 ```
 
 Для создания новой миграции используйте команду:
 ```shell
-make create_migration name=migration_name
+make create-migration name=migration_name
 ```
