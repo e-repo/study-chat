@@ -2,12 +2,14 @@ package auth
 
 import (
 	hasql "golang.yandex/hasql/sqlx"
+	"study-chat/generated/protobuf"
 	"study-chat/internal/config"
 	"study-chat/pkg/locator"
 	"study-chat/pkg/validator"
 )
 
 type Auth struct {
+	protobuf.UnimplementedUserServiceServer
 	repo          userRepository
 	service       *userService
 	validator     validator.Validator

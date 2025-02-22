@@ -1,11 +1,15 @@
 package auth
 
 import (
+	"context"
 	"errors"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"net/http"
 	"study-chat/generated/openapi"
+	"study-chat/generated/protobuf"
 )
 
 type RequestSignIn struct {
@@ -15,15 +19,16 @@ type RequestSignIn struct {
 
 func (a Auth) PostSignIn(c echo.Context) error {
 	var request RequestSignIn
-	var errs validator.ValidationErrors
 
 	if err := c.Bind(&request); err != nil {
 		return err
 	}
-
 	if err := a.validator.Validate.Struct(request); err != nil {
-		errors.As(err, &errs)
-		return echo.NewHTTPError(http.StatusBadRequest, errs.Translate(a.validator.Trans))
+		var errs validator.ValidationErrors
+		if errors.As(err, &errs) {
+			return echo.NewHTTPError(http.StatusBadRequest, errs.Translate(a.validator.Trans))
+		}
+		return echo.NewHTTPError(http.StatusUnprocessableEntity, err)
 	}
 
 	signIn := &signIn{
@@ -43,4 +48,33 @@ func (a Auth) PostSignIn(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, openapi.AuthUserResponse{Token: string(jwt)})
+}
+
+func (a Auth) SignIn(
+	ctx context.Context,
+	r *protobuf.AuthUserRequest,
+) (*protobuf.AuthUserResponse, error) {
+	request := &RequestSignIn{r.Email, r.Password}
+
+	if err := a.validator.Validate.Struct(request); err != nil {
+		var errs validator.ValidationErrors
+		if errors.As(err, &errs) {
+			translatedErr := errs.Translate(a.validator.Trans)
+			return nil, status.Errorf(codes.InvalidArgument, "%v", translatedErr)
+		}
+		return nil, status.Errorf(codes.Unknown, "%v", err.Error())
+	}
+
+	signIn := &signIn{
+		email:         request.Email,
+		password:      request.Password,
+		hmacSecretKey: a.hmacSecretKey,
+	}
+
+	jwt, err := a.service.signIn(ctx, signIn)
+	if err != nil {
+		return nil, status.Errorf(codes.Unknown, "%v", err.Error())
+	}
+
+	return &protobuf.AuthUserResponse{Token: string(jwt)}, nil
 }

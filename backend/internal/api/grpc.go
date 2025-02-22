@@ -1,16 +1,23 @@
 package api
 
-//type gRPCServer struct {
-//	users_app.UserHandlers
-//}
-//
-//func SetupGRPCServer(userRepo domain.UserRepository) *grpc.Server {
-//	s := grpc.NewServer()
-//
-//	server := gRPCServer{}
-//	server.UserHandlers = users_app.SetupHandlers(userRepo)
-//
-//	protobuf.RegisterUserServiceServer(s, server)
-//
-//	return s
-//}
+import (
+	"google.golang.org/grpc"
+	"study-chat/generated/protobuf"
+	"study-chat/internal/auth"
+	"study-chat/pkg/locator"
+)
+
+type gRPCServer struct {
+	auth.Auth
+}
+
+func SetupGRPCServer(locator locator.ServiceLocator) *grpc.Server {
+	s := grpc.NewServer()
+
+	server := gRPCServer{}
+	server.Auth = auth.SetupEndpoints(locator)
+
+	protobuf.RegisterUserServiceServer(s, server)
+
+	return s
+}

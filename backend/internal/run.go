@@ -50,15 +50,14 @@ func startServers(ctx context.Context, g *errgroup.Group, cfg config.Config) err
 	}
 
 	httpServer := api.SetupHTTPServer(locator)
-	//grpcServer := application.SetupGRPCServer(userRepo, orderRepo, productRepo)
+	grpcServer := api.SetupGRPCServer(locator)
 
 	address := "0.0.0.0:" + cfg.Server.Port
 	server := &http.Server{
 		Addr: address,
 		Handler: h2c.NewHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if r.ProtoMajor == 2 && strings.Contains(r.Header.Get("Content-Type"), "application/grpc") {
-				panic("gRPC server временно отключен!")
-				//grpcServer.ServeHTTP(w, r)
+				grpcServer.ServeHTTP(w, r)
 			} else {
 				httpServer.ServeHTTP(w, r)
 			}

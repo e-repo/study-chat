@@ -16,16 +16,17 @@ type RequestSignUp struct {
 
 func (a Auth) PostSignUp(c echo.Context) error {
 	var request RequestSignUp
-	var errs validator.ValidationErrors
 
 	ctx := c.Request().Context()
 	if err := c.Bind(&request); err != nil {
 		return err
 	}
-
 	if err := a.validator.Validate.Struct(request); err != nil {
-		errors.As(err, &errs)
-		return echo.NewHTTPError(http.StatusBadRequest, errs.Translate(a.validator.Trans))
+		var errs validator.ValidationErrors
+		if errors.As(err, &errs) {
+			return echo.NewHTTPError(http.StatusBadRequest, errs.Translate(a.validator.Trans))
+		}
+		return echo.NewHTTPError(http.StatusUnprocessableEntity, err)
 	}
 
 	signUp := signUp{
