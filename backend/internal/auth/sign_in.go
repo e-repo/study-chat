@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"study-chat/generated/openapi"
 	"study-chat/generated/protobuf"
+	"study-chat/pkg/validator/vlutils"
 )
 
 type RequestSignIn struct {
@@ -19,6 +20,7 @@ type RequestSignIn struct {
 
 func (a Auth) PostSignIn(c echo.Context) error {
 	var request RequestSignIn
+	var msg string
 
 	if err := c.Bind(&request); err != nil {
 		return err
@@ -26,9 +28,18 @@ func (a Auth) PostSignIn(c echo.Context) error {
 	if err := a.validator.Validate.Struct(request); err != nil {
 		var errs validator.ValidationErrors
 		if errors.As(err, &errs) {
-			return echo.NewHTTPError(http.StatusBadRequest, errs.Translate(a.validator.Trans))
+			msg = vlutils.ErrTranslationsToStr(errs.Translate(a.validator.Trans))
+
+			return echo.NewHTTPError(
+				http.StatusBadRequest,
+				openapi.ErrorResponse{Message: &msg},
+			)
 		}
-		return echo.NewHTTPError(http.StatusUnprocessableEntity, err)
+		msg = err.Error()
+		return echo.NewHTTPError(
+			http.StatusUnprocessableEntity,
+			openapi.ErrorResponse{Message: &msg},
+		)
 	}
 
 	signIn := &signIn{
@@ -40,7 +51,7 @@ func (a Auth) PostSignIn(c echo.Context) error {
 	ctx := c.Request().Context()
 	jwt, err := a.service.signIn(ctx, signIn)
 	if err != nil {
-		msg := err.Error()
+		msg = err.Error()
 		if errors.Is(err, ErrUserNotFound) || errors.Is(err, ErrInvalidPassword) {
 			return c.JSON(http.StatusBadRequest, openapi.ErrorResponse{Message: &msg})
 		}

@@ -39,7 +39,7 @@ func (r *PostgresRepo) CreateUser(
 	db := r.cluster.Primary().DBx()
 
 	query := `
-		INSERT INTO "User" (id, first_name, email, password)
+		INSERT INTO "user" (id, first_name, email, password)
 		VALUES (:id, :first_name, :email, :password)
 	`
 	_, err := db.NamedExecContext(ctx, query, user)
@@ -68,7 +68,7 @@ func (r *PostgresRepo) UpdateUser(
 		return user, nil
 	}
 	query := `
-		UPDATE "User"
+		UPDATE "user"
 		SET first_name = :first_name, email = :email, password = :password
 		WHERE id = :id
 	`
@@ -82,7 +82,7 @@ func (r *PostgresRepo) UpdateUser(
 func (r *PostgresRepo) SaveUser(ctx context.Context, user User) error {
 	db := r.cluster.Primary().DBx()
 	query := `
-		INSERT INTO "User" (id, first_name, email, password)
+		INSERT INTO "user" (id, first_name, email, password)
 		VALUES (:id, :name, :email)
 		ON CONFLICT (id) DO UPDATE SET name = :name, email = :email
 	`
@@ -96,7 +96,7 @@ func (r *PostgresRepo) SaveUser(ctx context.Context, user User) error {
 func (r *PostgresRepo) GetUserById(ctx context.Context, id uuid.UUID) (*User, error) {
 	db := r.cluster.StandbyPreferred().DBx()
 	var user User
-	query := `SELECT id, first_name, email FROM "User" WHERE id = $1`
+	query := `SELECT id, first_name, email FROM "user" WHERE id = $1`
 	if err := db.GetContext(ctx, &user, query, id); err != nil {
 		return nil, fmt.Errorf("ошибка получения пользователя: %w", err)
 	}
@@ -106,7 +106,7 @@ func (r *PostgresRepo) GetUserById(ctx context.Context, id uuid.UUID) (*User, er
 func (r *PostgresRepo) GetUserByEmail(ctx context.Context, email string) (*User, error) {
 	db := r.cluster.StandbyPreferred().DBx()
 	var user User
-	query := `SELECT id, first_name, email, password FROM "User" WHERE email = $1`
+	query := `SELECT id, first_name, email, password FROM "user" WHERE email = $1`
 	if err := db.GetContext(ctx, &user, query, email); err != nil {
 		return nil, fmt.Errorf("ошибка получения пользователя: %w", err)
 	}
@@ -115,7 +115,7 @@ func (r *PostgresRepo) GetUserByEmail(ctx context.Context, email string) (*User,
 
 func (r *PostgresRepo) DeleteUser(ctx context.Context, id uuid.UUID) error {
 	db := r.cluster.Primary().DBx()
-	query := `DELETE FROM "User" WHERE id = $1`
+	query := `DELETE FROM "user" WHERE id = $1`
 	_, err := db.ExecContext(ctx, query, id)
 	if err != nil {
 		return fmt.Errorf("Ошибка удаления пользователя: %w", err)
@@ -126,7 +126,7 @@ func (r *PostgresRepo) DeleteUser(ctx context.Context, id uuid.UUID) error {
 func (r *PostgresRepo) CheckUserExist(ctx context.Context, email string) (bool, error) {
 	db := r.cluster.Primary().DBx()
 
-	query := `SELECT EXISTS (SELECT 1 FROM "User" WHERE email = $1)`
+	query := `SELECT EXISTS (SELECT 1 FROM "user" WHERE email = $1)`
 	var exist bool
 	err := db.GetContext(ctx, &exist, query, email)
 	if err != nil {
