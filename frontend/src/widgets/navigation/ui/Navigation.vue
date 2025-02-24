@@ -11,7 +11,7 @@
 			<v-list-subheader
 				class="mt-8 text-decoration-underline"
 			>
-				<v-icon icon="mdi-chat-outline" class="mr-1"/>Каналы:
+				<v-icon icon="mdi-chat-outline" class="mr-1"/>Чаты:
 			</v-list-subheader>
 
 			<v-divider></v-divider>

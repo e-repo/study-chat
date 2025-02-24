@@ -6,7 +6,7 @@
 				@click="toggleNavigation"
 			></v-app-bar-nav-icon>
 		</template>
-		<v-app-bar-title>Чат</v-app-bar-title>
+		<v-app-bar-title>STUDY-CHAT</v-app-bar-title>
 		<template v-slot:append>
 			<v-menu
 				transition="slide-y-transition"
