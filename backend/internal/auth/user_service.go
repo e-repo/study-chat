@@ -8,10 +8,10 @@ import (
 )
 
 type userService struct {
-	repo userRepository
+	repo UserRepository
 }
 
-func newUserService(userRepo userRepository) *userService {
+func newUserService(userRepo UserRepository) *userService {
 	return &userService{repo: userRepo}
 }
 
@@ -27,12 +27,12 @@ type signIn struct {
 	hmacSecretKey string
 }
 
-func (u *userService) signIn(ctx context.Context, command *signIn) (jsonWebToken, error) {
-	user, err := u.repo.getUserByEmail(ctx, command.email)
+func (u *userService) signIn(ctx context.Context, signIn *signIn) (jsonWebToken, error) {
+	user, err := u.repo.GetUserByEmail(ctx, signIn.email)
 	if err != nil {
 		return "", ErrUserNotFound
 	}
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(command.password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(signIn.password)); err != nil {
 		return "", ErrInvalidPassword
 	}
 
@@ -42,7 +42,7 @@ func (u *userService) signIn(ctx context.Context, command *signIn) (jsonWebToken
 		Email:     user.Email,
 	}
 
-	jwt, err := newJwt(jwtPayload, 12*time.Hour, command.hmacSecretKey)
+	jwt, err := newJwt(jwtPayload, 12*time.Hour, signIn.hmacSecretKey)
 	if err != nil {
 		return "", err
 	}
@@ -57,14 +57,14 @@ func (u *userService) signUp(ctx context.Context, signUp *signUp) (uuid.UUID, er
 		return uuid.Nil, err
 	}
 
-	user := &user{
+	user := &User{
 		Id:        uuid.New(),
 		FirstName: signUp.fistName,
 		Email:     signUp.email,
 		Password:  string(passHash),
 	}
 
-	if _, err = u.repo.createUser(ctx, user); err != nil {
+	if _, err = u.repo.CreateUser(ctx, user); err != nil {
 		return uuid.Nil, err
 	}
 

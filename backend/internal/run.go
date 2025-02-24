@@ -49,7 +49,7 @@ func startServers(ctx context.Context, g *errgroup.Group, cfg config.Config) err
 		return err
 	}
 
-	httpServer := api.SetupHTTPServer(locator)
+	echoInstance := api.SetupRESTPServer(locator)
 	grpcServer := api.SetupGRPCServer(locator)
 
 	address := "0.0.0.0:" + cfg.Server.Port
@@ -59,7 +59,7 @@ func startServers(ctx context.Context, g *errgroup.Group, cfg config.Config) err
 			if r.ProtoMajor == 2 && strings.Contains(r.Header.Get("Content-Type"), "application/grpc") {
 				grpcServer.ServeHTTP(w, r)
 			} else {
-				httpServer.ServeHTTP(w, r)
+				echoInstance.ServeHTTP(w, r)
 			}
 		}), &http2.Server{}),
 		ReadHeaderTimeout: cfg.Server.ReadHeaderTimeout,

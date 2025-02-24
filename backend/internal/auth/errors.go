@@ -1,6 +1,8 @@
 package auth
 
-import "errors"
+import (
+	"errors"
+)
 
 var (
 	ErrUserNotFound     = errors.New("пользователь не найден")

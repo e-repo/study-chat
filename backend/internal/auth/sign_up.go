@@ -3,13 +3,15 @@ package auth
 import (
 	"errors"
 	"github.com/go-playground/validator/v10"
+	"study-chat/pkg/validator/vlutils"
+
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"study-chat/generated/openapi"
 )
 
 type RequestSignUp struct {
-	FirstName string `json:"first_name" validate:"required,min=4,max=100"`
+	FirstName string `json:"firstName" validate:"required,min=4,max=100"`
 	Email     string `json:"email" validate:"required,email,max=100"`
 	Password  string `json:"password" validate:"required,min=4,max=100"`
 }
@@ -24,7 +26,12 @@ func (a Auth) PostSignUp(c echo.Context) error {
 	if err := a.validator.Validate.Struct(request); err != nil {
 		var errs validator.ValidationErrors
 		if errors.As(err, &errs) {
-			return echo.NewHTTPError(http.StatusBadRequest, errs.Translate(a.validator.Trans))
+			msg := vlutils.ErrTranslationsToStr(errs.Translate(a.validator.Trans))
+
+			return echo.NewHTTPError(
+				http.StatusBadRequest,
+				openapi.ErrorResponse{Message: &msg},
+			)
 		}
 		return echo.NewHTTPError(http.StatusUnprocessableEntity, err)
 	}

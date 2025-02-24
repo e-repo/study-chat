@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"study-chat/internal/auth"
 	"study-chat/pkg/locator"
+	"testing"
 
 	"study-chat/generated/openapi"
 	"study-chat/pkg/echomiddleware"
@@ -12,11 +13,33 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-type httpServer struct {
+type HttpServer struct {
 	auth.Auth
 }
 
-func SetupHTTPServer(locator locator.ServiceLocator) *echo.Echo {
+func SetupRESTPServer(locator locator.ServiceLocator) *echo.Echo {
+	e := createEcho()
+
+	server := HttpServer{}
+	server.Auth = auth.CreateAuth(locator)
+
+	openapi.RegisterHandlers(e, server)
+
+	return e
+}
+
+func SetupRESTTestServer(t *testing.T) (*echo.Echo, HttpServer) {
+	e := createEcho()
+
+	server := HttpServer{}
+	server.Auth = auth.CreateTestAuth(t)
+
+	openapi.RegisterHandlers(e, server)
+
+	return e, server
+}
+
+func createEcho() *echo.Echo {
 	e := echo.New()
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(echomiddleware.PutRequestIDContext)
@@ -28,11 +51,6 @@ func SetupHTTPServer(locator locator.ServiceLocator) *echo.Echo {
 	//e.Use(echomiddleware.PutSentryContext)
 
 	setupPingEndpoint(e)
-
-	server := httpServer{}
-	server.Auth = auth.SetupEndpoints(locator)
-
-	openapi.RegisterHandlers(e, server)
 
 	return e
 }

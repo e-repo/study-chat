@@ -15,7 +15,7 @@ func SetupGRPCServer(locator locator.ServiceLocator) *grpc.Server {
 	s := grpc.NewServer()
 
 	server := gRPCServer{}
-	server.Auth = auth.SetupEndpoints(locator)
+	server.Auth = auth.CreateAuth(locator)
 
 	protobuf.RegisterUserServiceServer(s, server)
 

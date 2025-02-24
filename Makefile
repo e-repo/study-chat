@@ -62,7 +62,7 @@ down: docker-down
 ps: docker-ps
 up: docker-up
 
-bd-build: backend-build
+bb: backend-build
 db-up: database-up
 ch-up: front-up
 ch-serve: chat-serve
