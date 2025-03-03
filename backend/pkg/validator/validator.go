@@ -12,7 +12,7 @@ type Validator struct {
 	Trans    ut.Translator
 }
 
-func NewRuValidator() Validator {
+func NewRuValidator() *Validator {
 	validate := validator.New()
 
 	russian := ru.New()
@@ -21,7 +21,7 @@ func NewRuValidator() Validator {
 
 	_ = rutranslations.RegisterDefaultTranslations(validate, trans)
 
-	return Validator{
+	return &Validator{
 		Validate: validate,
 		Trans:    trans,
 	}

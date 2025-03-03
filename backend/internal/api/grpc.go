@@ -8,7 +8,7 @@ import (
 )
 
 type gRPCServer struct {
-	auth.Auth
+	*auth.Auth
 }
 
 func SetupGRPCServer(locator locator.ServiceLocator) *grpc.Server {

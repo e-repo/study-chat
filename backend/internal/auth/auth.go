@@ -14,21 +14,21 @@ type Auth struct {
 	protobuf.UnimplementedUserServiceServer
 	Repo          UserRepository
 	service       *userService
-	validator     validator.Validator
+	validator     *validator.Validator
 	hmacSecretKey string
 }
 
-func CreateAuth(locator locator.ServiceLocator) Auth {
+func CreateAuth(locator locator.ServiceLocator) *Auth {
 	cfg := locator.Get(config.ConfigServiceKey).(config.Config)
 
 	cluster := locator.Get(config.ClusterServiceKey).(*hasql.Cluster)
 	userRepo := newUserRepository(cluster)
 	userService := newUserService(userRepo)
-	validate := validator.NewRuValidator()
+	validate := locator.Get(config.ValidatorServiceKey).(*validator.Validator)
 
 	hmacSecretKey := cfg.Server.HmacSecretKey
 
-	return Auth{
+	return &Auth{
 		Repo:          userRepo,
 		service:       userService,
 		validator:     validate,
@@ -36,11 +36,11 @@ func CreateAuth(locator locator.ServiceLocator) Auth {
 	}
 }
 
-func CreateTestAuth(t *testing.T) Auth {
+func CreateTestAuth(t *testing.T) *Auth {
 	ctrl := gomock.NewController(t)
 	userRepo := NewMockUserRepository(ctrl)
 
-	return Auth{
+	return &Auth{
 		Repo:          userRepo,
 		service:       newUserService(userRepo),
 		validator:     validator.NewRuValidator(),

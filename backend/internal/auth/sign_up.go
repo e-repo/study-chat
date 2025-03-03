@@ -21,19 +21,29 @@ func (a Auth) PostSignUp(c echo.Context) error {
 
 	ctx := c.Request().Context()
 	if err := c.Bind(&request); err != nil {
-		return err
+		msg := err.Error()
+
+		return c.JSON(
+			http.StatusUnprocessableEntity,
+			openapi.ErrorResponse{Message: &msg},
+		)
 	}
 	if err := a.validator.Validate.Struct(request); err != nil {
 		var errs validator.ValidationErrors
 		if errors.As(err, &errs) {
 			msg := vlutils.ErrTranslationsToStr(errs.Translate(a.validator.Trans))
 
-			return echo.NewHTTPError(
+			return c.JSON(
 				http.StatusBadRequest,
 				openapi.ErrorResponse{Message: &msg},
 			)
 		}
-		return echo.NewHTTPError(http.StatusUnprocessableEntity, err)
+
+		msg := err.Error()
+		return c.JSON(
+			http.StatusUnprocessableEntity,
+			openapi.ErrorResponse{Message: &msg},
+		)
 	}
 
 	signUp := signUp{
@@ -46,9 +56,6 @@ func (a Auth) PostSignUp(c echo.Context) error {
 
 	if err != nil {
 		msg := err.Error()
-		if errors.Is(err, ErrInvalidUser) || errors.Is(err, ErrUserValidation) {
-			return c.JSON(http.StatusBadRequest, openapi.ErrorResponse{Message: &msg})
-		}
 		if errors.Is(err, ErrUserAlreadyExist) {
 			return c.JSON(http.StatusConflict, openapi.ErrorResponse{Message: &msg})
 		}

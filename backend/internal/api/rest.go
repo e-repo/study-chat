@@ -4,6 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"study-chat/internal/auth"
+	"study-chat/internal/chat"
 	"study-chat/pkg/locator"
 	"testing"
 
@@ -14,14 +15,16 @@ import (
 )
 
 type HttpServer struct {
-	auth.Auth
+	*auth.Auth
+	*chat.Chat
 }
 
-func SetupRESTPServer(locator locator.ServiceLocator) *echo.Echo {
+func SetupRESTServer(locator locator.ServiceLocator) *echo.Echo {
 	e := createEcho()
 
 	server := HttpServer{}
 	server.Auth = auth.CreateAuth(locator)
+	server.Chat = chat.CreateChat(locator)
 
 	openapi.RegisterHandlers(e, server)
 

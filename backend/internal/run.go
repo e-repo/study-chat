@@ -49,7 +49,7 @@ func startServers(ctx context.Context, g *errgroup.Group, cfg config.Config) err
 		return err
 	}
 
-	echoInstance := api.SetupRESTPServer(locator)
+	echoInstance := api.SetupRESTServer(locator)
 	grpcServer := api.SetupGRPCServer(locator)
 
 	address := "0.0.0.0:" + cfg.Server.Port

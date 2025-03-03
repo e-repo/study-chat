@@ -87,6 +87,11 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
+	// PostMessageWithBody request with any body
+	PostMessageWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostMessage(ctx context.Context, body PostMessageJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// PostSignInWithBody request with any body
 	PostSignInWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -96,6 +101,30 @@ type ClientInterface interface {
 	PostSignUpWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	PostSignUp(ctx context.Context, body PostSignUpJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+}
+
+func (c *Client) PostMessageWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostMessageRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostMessage(ctx context.Context, body PostMessageJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostMessageRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
 }
 
 func (c *Client) PostSignInWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -144,6 +173,46 @@ func (c *Client) PostSignUp(ctx context.Context, body PostSignUpJSONRequestBody,
 		return nil, err
 	}
 	return c.Client.Do(req)
+}
+
+// NewPostMessageRequest calls the generic PostMessage builder with application/json body
+func NewPostMessageRequest(server string, body PostMessageJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostMessageRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostMessageRequestWithBody generates requests for PostMessage with any type of body
+func NewPostMessageRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/message")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
 }
 
 // NewPostSignInRequest calls the generic PostSignIn builder with application/json body
@@ -269,6 +338,11 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
+	// PostMessageWithBodyWithResponse request with any body
+	PostMessageWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostMessageResponse, error)
+
+	PostMessageWithResponse(ctx context.Context, body PostMessageJSONRequestBody, reqEditors ...RequestEditorFn) (*PostMessageResponse, error)
+
 	// PostSignInWithBodyWithResponse request with any body
 	PostSignInWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostSignInResponse, error)
 
@@ -278,6 +352,29 @@ type ClientWithResponsesInterface interface {
 	PostSignUpWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostSignUpResponse, error)
 
 	PostSignUpWithResponse(ctx context.Context, body PostSignUpJSONRequestBody, reqEditors ...RequestEditorFn) (*PostSignUpResponse, error)
+}
+
+type PostMessageResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON400      *ErrorResponse
+	JSON500      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r PostMessageResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostMessageResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
 }
 
 type PostSignInResponse struct {
@@ -330,6 +427,23 @@ func (r PostSignUpResponse) StatusCode() int {
 	return 0
 }
 
+// PostMessageWithBodyWithResponse request with arbitrary body returning *PostMessageResponse
+func (c *ClientWithResponses) PostMessageWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostMessageResponse, error) {
+	rsp, err := c.PostMessageWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostMessageResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostMessageWithResponse(ctx context.Context, body PostMessageJSONRequestBody, reqEditors ...RequestEditorFn) (*PostMessageResponse, error) {
+	rsp, err := c.PostMessage(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostMessageResponse(rsp)
+}
+
 // PostSignInWithBodyWithResponse request with arbitrary body returning *PostSignInResponse
 func (c *ClientWithResponses) PostSignInWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostSignInResponse, error) {
 	rsp, err := c.PostSignInWithBody(ctx, contentType, body, reqEditors...)
@@ -362,6 +476,39 @@ func (c *ClientWithResponses) PostSignUpWithResponse(ctx context.Context, body P
 		return nil, err
 	}
 	return ParsePostSignUpResponse(rsp)
+}
+
+// ParsePostMessageResponse parses an HTTP response from a PostMessageWithResponse call
+func ParsePostMessageResponse(rsp *http.Response) (*PostMessageResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostMessageResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
 }
 
 // ParsePostSignInResponse parses an HTTP response from a PostSignInWithResponse call

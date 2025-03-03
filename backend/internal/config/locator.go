@@ -6,15 +6,18 @@ import (
 	hasql "golang.yandex/hasql/sqlx"
 	"study-chat/pkg/locator"
 	"study-chat/pkg/postgres"
+	"study-chat/pkg/validator"
 )
 
 const (
-	ConfigServiceKey  = "config"
-	ClusterServiceKey = "cluster"
+	ConfigServiceKey    = "config"
+	ClusterServiceKey   = "cluster"
+	ValidatorServiceKey = "validator"
 )
 
 func InitLocator(cfg Config) (locator.ServiceLocator, error) {
 	serviceLoc := locator.NewLocator()
+	validate := validator.NewRuValidator()
 
 	cluster, err := initCluster(cfg)
 	if err != nil {
@@ -23,6 +26,7 @@ func InitLocator(cfg Config) (locator.ServiceLocator, error) {
 
 	serviceLoc.Add(ConfigServiceKey, cfg)
 	serviceLoc.Add(ClusterServiceKey, cluster)
+	serviceLoc.Add(ValidatorServiceKey, validate)
 
 	return serviceLoc, nil
 }
