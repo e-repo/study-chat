@@ -41,5 +41,20 @@ services:
     stdin_open: true
     tty: true
 
+  centrifugo:
+    container_name: centrifugo
+    image: centrifugo/centrifugo:v6
+    volumes:
+      - ./centrifugo:/centrifugo
+    command: centrifugo -c config.json
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+
 volumes:
   postgres_data:
