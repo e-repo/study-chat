@@ -26,7 +26,9 @@ func newJwt(
 		"exp":       time.Now().Add(duration).Unix(),
 	}
 
-	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(hmacSecretKey))
+	token, err := jwt.
+		NewWithClaims(jwt.SigningMethodHS256, claims).
+		SignedString([]byte(hmacSecretKey))
 	if err != nil {
 		return "", err
 	}

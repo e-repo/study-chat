@@ -48,6 +48,11 @@ type MessageDataRequest struct {
 	UserName string `json:"userName"`
 }
 
+// MessageResponse defines model for MessageResponse.
+type MessageResponse struct {
+	Message string `json:"message"`
+}
+
 // PostMessageJSONRequestBody defines body for PostMessage for application/json ContentType.
 type PostMessageJSONRequestBody = AddMessageRequest
 

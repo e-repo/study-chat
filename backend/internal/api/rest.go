@@ -1,6 +1,7 @@
 package api
 
 import (
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"study-chat/internal/auth"
@@ -14,17 +15,25 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
+var jwtSkippedRoute = []string{
+	"/ping",
+	"/sign-in",
+	"/sign-up",
+}
+
 type HttpServer struct {
 	*auth.Auth
 	*chat.Chat
 }
 
 func SetupRESTServer(locator locator.ServiceLocator) *echo.Echo {
-	e := createEcho()
+	e := createDefaultEcho()
 
 	server := HttpServer{}
 	server.Auth = auth.CreateAuth(locator)
 	server.Chat = chat.CreateChat(locator)
+
+	e.Use(createJwtMiddleware(server.HmacSecretKey))
 
 	openapi.RegisterHandlers(e, server)
 
@@ -32,7 +41,7 @@ func SetupRESTServer(locator locator.ServiceLocator) *echo.Echo {
 }
 
 func SetupRESTTestServer(t *testing.T) (*echo.Echo, HttpServer) {
-	e := createEcho()
+	e := createDefaultEcho()
 
 	server := HttpServer{}
 	server.Auth = auth.CreateTestAuth(t)
@@ -42,7 +51,7 @@ func SetupRESTTestServer(t *testing.T) (*echo.Echo, HttpServer) {
 	return e, server
 }
 
-func createEcho() *echo.Echo {
+func createDefaultEcho() *echo.Echo {
 	e := echo.New()
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(echomiddleware.PutRequestIDContext)
@@ -56,6 +65,21 @@ func createEcho() *echo.Echo {
 	setupPingEndpoint(e)
 
 	return e
+}
+
+func createJwtMiddleware(secretKey string) echo.MiddlewareFunc {
+	return echojwt.WithConfig(echojwt.Config{
+		SigningKey: []byte(secretKey),
+		Skipper: func(c echo.Context) bool {
+			for _, path := range jwtSkippedRoute {
+				if path == c.Path() {
+					return true
+				}
+			}
+
+			return false
+		},
+	})
 }
 
 func setupPingEndpoint(e *echo.Echo) {

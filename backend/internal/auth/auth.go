@@ -15,7 +15,7 @@ type Auth struct {
 	Repo          UserRepository
 	service       *userService
 	validator     *validator.Validator
-	hmacSecretKey string
+	HmacSecretKey string
 }
 
 func CreateAuth(locator locator.ServiceLocator) *Auth {
@@ -32,7 +32,7 @@ func CreateAuth(locator locator.ServiceLocator) *Auth {
 		Repo:          userRepo,
 		service:       userService,
 		validator:     validate,
-		hmacSecretKey: hmacSecretKey,
+		HmacSecretKey: hmacSecretKey,
 	}
 }
 
@@ -44,6 +44,6 @@ func CreateTestAuth(t *testing.T) *Auth {
 		Repo:          userRepo,
 		service:       newUserService(userRepo),
 		validator:     validator.NewRuValidator(),
-		hmacSecretKey: "hmac-secret-key",
+		HmacSecretKey: "hmac-secret-key",
 	}
 }

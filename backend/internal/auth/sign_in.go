@@ -45,7 +45,7 @@ func (a Auth) PostSignIn(c echo.Context) error {
 	signIn := &signIn{
 		email:         request.Email,
 		password:      request.Password,
-		hmacSecretKey: a.hmacSecretKey,
+		hmacSecretKey: a.HmacSecretKey,
 	}
 
 	ctx := c.Request().Context()
@@ -79,7 +79,7 @@ func (a Auth) SignIn(
 	signIn := &signIn{
 		email:         request.Email,
 		password:      request.Password,
-		hmacSecretKey: a.hmacSecretKey,
+		hmacSecretKey: a.HmacSecretKey,
 	}
 
 	jwt, err := a.service.signIn(ctx, signIn)

@@ -357,6 +357,7 @@ type ClientWithResponsesInterface interface {
 type PostMessageResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
+	JSON201      *MessageResponse
 	JSON400      *ErrorResponse
 	JSON500      *ErrorResponse
 }
@@ -492,6 +493,13 @@ func ParsePostMessageResponse(rsp *http.Response) (*PostMessageResponse, error) 
 	}
 
 	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest MessageResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
 		var dest ErrorResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {

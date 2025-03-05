@@ -68,5 +68,8 @@ func (ch *Chat) PostMessage(c echo.Context) error {
 		return echo.ErrInternalServerError
 	}
 
-	return c.JSON(http.StatusCreated, "Сообшение успешно добавленно")
+	return c.JSON(
+		http.StatusCreated,
+		openapi.MessageResponse{Message: "Сообщение успешно добавленно"},
+	)
 }
